@@ -39,8 +39,23 @@
 - [x] Minitarea 5: Fase TDD RED: Crear `tests/test_authorization.py` con 4 tests granulares de seguridad.
 
 ## Fase 7: Mensajería Asíncrona (RabbitMQ)
-- [ ] Minitarea 1: Crear `src/domain/events.py` con el DTO `InspeccionCreadaEvent`.
-- [ ] Minitarea 2: Crear abstracción `src/domain/event_publisher_interface.py` con `publish()`.
-- [ ] Minitarea 3: Modificar `RegisterInspeccionUseCase` para publicar el evento y testearlo (TDD Green) aislando failures.
-- [ ] Minitarea 4: Añadir `pika` a requirements e implementar `src/infrastructure/events/rabbitmq_publisher.py`.
-- [ ] Minitarea 5: Inyectar publicador en `main.py` para el endpoint POST `/inspecciones`.
+- [x] Minitarea 1: Crear `src/domain/events.py` con el DTO `InspeccionCreadaEvent`.
+- [x] Minitarea 2: Crear abstracción `src/domain/event_publisher_interface.py` con `publish()`.
+- [x] Minitarea 3: Modificar `RegisterInspeccionUseCase` para publicar el evento y testearlo (TDD Green) aislando failures.
+- [x] Minitarea 4: Añadir `pika` a requirements e implementar `src/infrastructure/events/rabbitmq_publisher.py`.
+- [x] Minitarea 5: Inyectar publicador en `main.py` para el endpoint POST `/inspecciones`.
+
+## Fase 8: Almacenamiento de Fotos (MinIO)
+- [x] Minitarea 1: Validar políticas IAM (Sanity Check de Autorización).
+- [x] Minitarea 2: Crear `src/infrastructure/storage/minio_client.py` con subida y presigned URLs. Añadir dependencias (`minio`, `python-multipart`).
+- [x] Minitarea 3: Actualizar entidad `Inspeccion` y base de datos con campos para listado de fotos si aplica.
+- [x] Minitarea 4: Crear caso de uso `UploadInspeccionFoto`.
+- [x] Minitarea 5: Añadir endpoint POST `/inspecciones/{id}/photos` a la API.
+- [x] Minitarea 6: TDD: Añadir `tests/test_storage.py` con mocks de MinIO para asegurar que se enlaza a Inspección.
+
+## Revisión Final (MinIO Hito 2.3)
+- Se ha actualizado la base de datos `01_init_schema.sql` y las entidades para soportar la columna `foto_keys TEXT[]`.
+- Se ha implementado el adaptador de infraestructura `minio_client.py` con `upload_file`.
+- Se ha creado el caso de uso `UploadInspeccionFotoUseCase` que respeta la autorización (policy `can_edit_inspeccion`).
+- Se ha implementado un nuevo endpoint robusto en FastAPI `POST /inspecciones/{id}/photos`.
+- Los tests globales de la API han superado la validación en verde, previniendo fallos de Foreign Keys mediante Test Idempotency (Mocks Minio).

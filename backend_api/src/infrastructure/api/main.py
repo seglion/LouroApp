@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, status, HTTPException, Request
+from fastapi import FastAPI, Depends, status, HTTPException, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -16,6 +16,9 @@ from src.infrastructure.api.schemas import InspeccionRequest, InspeccionUpdate, 
 from pydantic import BaseModel, Field, EmailStr
 from src.application.update_user import UpdateUserUseCase
 from src.application.create_user import CreateUserUseCase
+import uuid
+from src.application.upload_inspeccion_foto import UploadInspeccionFotoUseCase
+from src.infrastructure.storage.minio_client import MinioStorageClient
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -96,9 +99,47 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), use_case: LoginUserU
         )
     return {"access_token": token, "token_type": "bearer"}
 
-def get_register_inspeccion_use_case(db: Session = Depends(get_db)):
+from src.domain.event_publisher_interface import EventPublisher
+from src.infrastructure.events.rabbitmq_publisher import RabbitMQPublisher
+
+def get_event_publisher():
+    # Devuelve la configuración de producción real a RabbitMQ
+    return RabbitMQPublisher(host="gis_saneamiento_rabbit", exchange="inspecciones.v1")
+
+def get_register_inspeccion_use_case(db: Session = Depends(get_db), publisher: EventPublisher = Depends(get_event_publisher)):
     repository = SqlAlchemyInspeccionRepository(db)
-    return RegisterInspeccionUseCase(repository)
+    user_repo = SqlAlchemyUserRepository(db)
+    return RegisterInspeccionUseCase(repository, user_repo=user_repo, event_publisher=publisher)
+
+def get_minio_client():
+    return MinioStorageClient()
+
+def get_upload_inspeccion_foto_use_case(
+    db: Session = Depends(get_db),
+    storage: MinioStorageClient = Depends(get_minio_client)
+):
+    repository = SqlAlchemyInspeccionRepository(db)
+    return UploadInspeccionFotoUseCase(repository, storage)
+
+@app.post("/inspecciones/{inspeccion_id}/photos", status_code=status.HTTP_201_CREATED)
+def upload_foto(
+    inspeccion_id: uuid.UUID,
+    file: UploadFile = File(...),
+    use_case: UploadInspeccionFotoUseCase = Depends(get_upload_inspeccion_foto_use_case),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        new_keys = use_case.execute(
+            inspeccion_id=inspeccion_id,
+            file_data=file.file,
+            file_name=file.filename,
+            content_type=file.content_type,
+            current_user=current_user
+        )
+        return {"status": "success", "foto_keys": new_keys}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    # Domain ForbiddenError is already natively handled by exception_handler
 
 @app.get("/health")
 def health_check(db: Session = Depends(get_db)):

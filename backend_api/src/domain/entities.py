@@ -57,4 +57,5 @@ class Inspeccion:
     ruta_foto_situacion: Optional[str] = None
     ruta_foto_interior: Optional[str] = None
     observaciones: Optional[str] = None
+    foto_keys: list[str] = field(default_factory=list)
     acometidas: List[Acometida] = field(default_factory=list)

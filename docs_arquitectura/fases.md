@@ -19,6 +19,10 @@ Hito 1.1: Servidor Hetzner aprovisionado con Docker Engine/Swarm o k3s.
 Hito 1.2: Base de datos (PostgreSQL + PostGIS), MinIO y RabbitMQ desplegados y securizados en la nube.
 Hito 1.3: Conexión VPN/TLS configurada de forma segura para el Worker On-Premise.
 Orden de ejecución: 1) Cloud networking/seguridad -> 2) Despliegue de servicios middleware (DB, MQ, Storage) -> 3) Pruebas de conectividad desde On-Premise.
+
+
+
+
 Fase 2: Desarrollo del Backend Cloud (FastAPI)
 Construir la capa de servicios REST que interactuará con la PWA.
 
@@ -30,6 +34,14 @@ Hito 2.3: Integración de MinIO mediante Presigned URLs para desacoplar el tráf
 Riesgos Técnicos y Mitigación:
 Riesgo (Transacciones Distribuidas): El registro se guarda en PostGIS, pero RabbitMQ falla al recibir el evento (Dual Write Problem).
 Mitigación: Implementar el Transactional Outbox Pattern. FastAPI guarda el dato GIS y el evento en una tabla "outbox" de PostgreSQL en la misma transacción. Un proceso en background (o CDC) lee el outbox y lo envía a RabbitMQ, garantizando entrega At-Least-Once.
+
+
+
+
+
+
+
+
 Fase 3: Frontend PWA y Ecosistema Offline-First (Vue.js)
 El componente más crítico de cara al usuario. Debe sentirse como una aplicación nativa.
 

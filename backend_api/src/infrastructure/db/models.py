@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Float, Integer, ForeignKey, Date, Numeric, Text, Enum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from src.infrastructure.db.database import Base
@@ -59,6 +59,7 @@ class PozoSaneamientoModel(Base):
     ruta_foto_situacion = Column(Text)
     ruta_foto_interior = Column(String(500))
     observaciones = Column(Text)
+    foto_keys = Column(ARRAY(String), default=list)
 
     acometidas = relationship("AcometidaSaneamientoModel", back_populates="pozo", cascade="all, delete-orphan")
     tecnico = relationship("UserModel", back_populates="inspecciones")

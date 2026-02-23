@@ -8,8 +8,11 @@ from src.infrastructure.db.models import PozoSaneamientoModel
 from src.infrastructure.api.dependencies import get_current_user
 from src.domain.user_entities import User, Role
 from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
+from unittest.mock import MagicMock
+from src.infrastructure.api.main import get_event_publisher
 
 TEST_TECNICO = None
+mock_publisher = MagicMock()
 
 def mock_get_current_user():
     return TEST_TECNICO
@@ -19,7 +22,9 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def override_dependency():
     app.dependency_overrides[get_current_user] = mock_get_current_user
+    app.dependency_overrides[get_event_publisher] = lambda: mock_publisher
     yield
+    mock_publisher.reset_mock()
     app.dependency_overrides.clear()
 
 @pytest.fixture(autouse=True)
@@ -98,3 +103,8 @@ def test_register_inspeccion_success():
     assert pozo.id_pozo == id_pozo_real
     assert len(pozo.acometidas) == 1
     db.close()
+    
+    mock_publisher.publish.assert_called_once()
+    evento_emitido = mock_publisher.publish.call_args[0][0]
+    assert str(evento_emitido.id_inspeccion) == pozo_id
+    assert evento_emitido.id_pozo == id_pozo_real

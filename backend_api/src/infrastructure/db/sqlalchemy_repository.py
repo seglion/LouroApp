@@ -65,6 +65,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
             colector_diametro_salida_mm=model.colector_diametro_salida_mm,
             ruta_foto_situacion=model.ruta_foto_situacion,
             ruta_foto_interior=model.ruta_foto_interior,
+            foto_keys=model.foto_keys or [],
             observaciones=model.observaciones,
             acometidas=acometidas_domain
         )
@@ -110,6 +111,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
             colector_diametro_salida_mm=inspeccion.colector_diametro_salida_mm,
             ruta_foto_situacion=inspeccion.ruta_foto_situacion,
             ruta_foto_interior=inspeccion.ruta_foto_interior,
+            foto_keys=inspeccion.foto_keys,
             observaciones=inspeccion.observaciones
         )
 
@@ -176,6 +178,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
         model.colector_diametro_salida_mm = inspeccion.colector_diametro_salida_mm
         model.ruta_foto_situacion = inspeccion.ruta_foto_situacion
         model.ruta_foto_interior = inspeccion.ruta_foto_interior
+        model.foto_keys = inspeccion.foto_keys
         model.observaciones = inspeccion.observaciones
 
         # Actualizar relaciones Acometidas
