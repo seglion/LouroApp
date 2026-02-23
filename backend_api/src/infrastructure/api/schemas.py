@@ -18,7 +18,6 @@ class InspeccionRequest(BaseModel):
     id: UUID
     id_pozo: str = Field(..., max_length=50)
     coordenadas_utm: CoordenadasUTMBase
-    tecnico_id: Optional[UUID] = None
     fecha_inspec: Optional[date] = None
     calle_zona: Optional[str] = Field(None, max_length=255)
     situacion: Optional[str] = Field(None, max_length=100)

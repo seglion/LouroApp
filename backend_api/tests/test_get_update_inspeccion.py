@@ -1,9 +1,42 @@
 import uuid
 import random
+import pytest
 from fastapi.testclient import TestClient
 from src.infrastructure.api.main import app
+from src.infrastructure.api.dependencies import get_current_user
+from src.domain.user_entities import User, Role
+from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
+from src.infrastructure.db.database import SessionLocal
+
+TEST_TECNICO = None
+
+def mock_get_current_user():
+    return TEST_TECNICO
 
 client = TestClient(app)
+
+@pytest.fixture(autouse=True)
+def override_dependency():
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield
+    app.dependency_overrides.clear()
+
+@pytest.fixture(autouse=True)
+def setup_tecnico():
+    global TEST_TECNICO
+    db = SessionLocal()
+    repo = SqlAlchemyUserRepository(db)
+    
+    uid = uuid.uuid4()
+    TEST_TECNICO = User(
+        id=uid,
+        email=f"tester_{uid}@test.com",
+        full_name="Tester",
+        hashed_password="pwd",
+        role=Role.TECNICO
+    )
+    repo.save(TEST_TECNICO)
+    db.close()
 
 def test_full_inspeccion_lifecycle():
     # 1. Crear una inspección ("mock" de UUIDv7 válidos)

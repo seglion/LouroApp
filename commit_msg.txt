@@ -1,0 +1,6 @@
+feat(auth): Implement JWT authentication and identity domain
+
+Add user domain entities and PostgreSQL repository implementation.
+Integrate passlib and python-jose to enforce JWT authentication.
+Refactor inspection creation to extract technician ID from secure token.
+Update related TDD test suites fixing dependency override pollution.

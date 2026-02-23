@@ -1,8 +1,22 @@
-from sqlalchemy import Column, String, Integer, Numeric, Date, ForeignKey, Text
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Date, Numeric, Text, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
 from src.infrastructure.db.database import Base
+
+from src.domain.user_entities import Role
+
+class UserModel(Base):
+    __tablename__ = "tecnicos"  # Usamos la tabla especificada en 00_esquema_seguridad.sql
+
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    email = Column(String(255), unique=True, nullable=False)
+    nombre = Column("nombre", String(255), nullable=False) # Mapeo de full_name
+    password_hash = Column("password_hash", String(255), nullable=False) # Mapeo de hashed_pwd
+    rol = Column("rol", Enum(Role), nullable=False, default=Role.TECNICO) # Mapeo de role
+    
+    # Relación inversa (opcional pero recomendada para facilitar consultas)
+    inspecciones = relationship("PozoSaneamientoModel", back_populates="tecnico")
 
 class PozoSaneamientoModel(Base):
     __tablename__ = "pozos_saneamiento"
@@ -10,8 +24,8 @@ class PozoSaneamientoModel(Base):
     id = Column(UUID(as_uuid=True), primary_key=True)
     id_pozo = Column(String(50), unique=True, nullable=False)
     geom = Column(Geometry('POINT', srid=25829))
-    tecnico_id = Column(UUID(as_uuid=True), nullable=True)
-    fecha_inspec = Column(Date)
+    tecnico_id = Column(UUID(as_uuid=True), ForeignKey("tecnicos.id", ondelete="SET NULL"), nullable=True)
+    fecha_inspec = Column(Date, nullable=True)
     calle_zona = Column(String(255))
     situacion = Column(String(100))
     cota_tapa = Column(Numeric(8, 3))
@@ -43,10 +57,11 @@ class PozoSaneamientoModel(Base):
     colector_mat_salida = Column(String(50))
     colector_diametro_salida_mm = Column(Integer)
     ruta_foto_situacion = Column(Text)
-    ruta_foto_interior = Column(Text)
+    ruta_foto_interior = Column(String(500))
     observaciones = Column(Text)
 
     acometidas = relationship("AcometidaSaneamientoModel", back_populates="pozo", cascade="all, delete-orphan")
+    tecnico = relationship("UserModel", back_populates="inspecciones")
 
 class AcometidaSaneamientoModel(Base):
     __tablename__ = "acometidas_saneamiento"

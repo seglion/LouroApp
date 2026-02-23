@@ -1,17 +1,49 @@
 import uuid
 import random
+import pytest
 from fastapi.testclient import TestClient
 from src.infrastructure.api.main import app
 from src.infrastructure.db.database import SessionLocal
 from src.infrastructure.db.models import PozoSaneamientoModel
+from src.infrastructure.api.dependencies import get_current_user
+from src.domain.user_entities import User, Role
+from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
+
+TEST_TECNICO = None
+
+def mock_get_current_user():
+    return TEST_TECNICO
 
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def override_dependency():
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield
+    app.dependency_overrides.clear()
+
+@pytest.fixture(autouse=True)
+def setup_tecnico():
+    global TEST_TECNICO
+    db = SessionLocal()
+    repo = SqlAlchemyUserRepository(db)
+    
+    uid = uuid.uuid4()
+    TEST_TECNICO = User(
+        id=uid,
+        email=f"tester_{uid}@test.com",
+        full_name="Tester",
+        hashed_password="pwd",
+        role=Role.TECNICO
+    )
+    repo.save(TEST_TECNICO)
+    db.close()
+
 def test_register_inspeccion_success():
     """Test para validar TDD: Creación de Inspección Completa"""
-    # Simulamos UUIDv7 válidos generados desde la PWA según el ADR-001
-    pozo_id = "018f6d54-1b9a-7000-8000-000000000001"
-    acometida_id = "018f6d54-1b9a-7000-8000-000000000002"
+    # Simulamos UUIDv7 válidos generados desde la PWA según el ADR-001 (randomizados para no chocar)
+    pozo_id = f"018f6d54-1b9a-7000-8000-0000{random.randint(10000000, 99999999)}"
+    acometida_id = f"018f6d54-1b9a-7000-8000-0000{random.randint(10000000, 99999999)}"
     id_pozo_real = f"P-{random.randint(1000, 99999)}"
 
     payload = {

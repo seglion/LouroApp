@@ -1,18 +1,36 @@
-from fastapi import FastAPI, Depends, status
+from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from src.infrastructure.db.database import get_db
-
-from src.infrastructure.api.schemas import InspeccionRequest
-from src.domain.entities import Inspeccion, CoordenadasUTM, Acometida
+from src.infrastructure.db.database import Base, engine, get_db
 from src.infrastructure.db.sqlalchemy_repository import SqlAlchemyInspeccionRepository
+from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
 from src.application.register_inspeccion import RegisterInspeccionUseCase
+from src.application.login_user import LoginUserUseCase
+from src.infrastructure.api.dependencies import get_current_user
+from src.domain.entities import Inspeccion, CoordenadasUTM, Acometida
+from src.domain.user_entities import User
+from src.infrastructure.api.schemas import InspeccionRequest
 
-app = FastAPI(
-    title="API GIS Saneamiento - Field Collection",
-    version="1.0.0",
-    description="Backend microservice using Clean Architecture"
-)
+# ... Create tables (just in case) ...
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="LouroApp API", version="1.0.0")
+
+def get_login_use_case(db: Session = Depends(get_db)):
+    repository = SqlAlchemyUserRepository(db)
+    return LoginUserUseCase(repository)
+
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), use_case: LoginUserUseCase = Depends(get_login_use_case)):
+    token = use_case.execute(form_data.username, form_data.password)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {"access_token": token, "token_type": "bearer"}
 
 def get_register_inspeccion_use_case(db: Session = Depends(get_db)):
     repository = SqlAlchemyInspeccionRepository(db)
@@ -34,7 +52,8 @@ def health_check(db: Session = Depends(get_db)):
 @app.post("/inspecciones", status_code=status.HTTP_201_CREATED)
 def create_inspeccion(
     request: InspeccionRequest,
-    use_case: RegisterInspeccionUseCase = Depends(get_register_inspeccion_use_case)
+    use_case: RegisterInspeccionUseCase = Depends(get_register_inspeccion_use_case),
+    current_user: User = Depends(get_current_user)
 ):
     acometidas_entities = [
         Acometida(
@@ -45,12 +64,13 @@ def create_inspeccion(
             profundidad_m=ac.profundidad_m
         ) for ac in request.acometidas
     ]
+    coords = CoordenadasUTM(x=request.coordenadas_utm.x, y=request.coordenadas_utm.y)
 
     inspeccion = Inspeccion(
         id=request.id,
         id_pozo=request.id_pozo,
-        coordenadas_utm=CoordenadasUTM(x=request.coordenadas_utm.x, y=request.coordenadas_utm.y),
-        tecnico_id=request.tecnico_id,
+        coordenadas_utm=coords,
+        tecnico_id=current_user.id,
         fecha_inspec=request.fecha_inspec,
         calle_zona=request.calle_zona,
         situacion=request.situacion,
