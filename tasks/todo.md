@@ -1,6 +1,6 @@
-# Plan de Tareas: Fase 1 - Infraestructura Local con Docker
+# Plan de Tareas: Fase 2 - Backend FastAPI & Clean Architecture
 
-- [x] Crear archivo `.env` en la raíz con credenciales de desarrollo.
-- [x] Crear carpeta `db_init` y archivo `01_init_schema.sql` con el script SQL de inicialización completo.
-- [x] Crear archivo `docker-compose.yml` en la raíz que orqueste PostGIS, MinIO y RabbitMQ.
-- [x] Revisión Final: Verificar redes, puertos, volúmenes de persistencia y mapeo de variables de entorno.
+- [x] Crear archivos de dependencias (`requirements.txt`, `requirements-dev.txt`).
+- [x] Crear estructura de directorios de Clean Architecture en `backend_api/src/`.
+- [x] Implementar la prueba unitaria TDD (Fase RED) para el endpoint `/health`.
+- [x] Implementar la base de datos y la API (Fase GREEN) para que la prueba pase.
