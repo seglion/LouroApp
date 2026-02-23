@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  postgis:
+    image: postgis/postgis:15-3.3
+    container_name: gis_saneamiento_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_init:/docker-entrypoint-initdb.d/
+      - postgis_data:/var/lib/postgresql/data
+    networks:
+      - gis_dev_net
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: gis_saneamiento_minio
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - gis_dev_net
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: gis_saneamiento_rabbit
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - gis_dev_net
+    restart: unless-stopped
+
+networks:
+  gis_dev_net:
+    driver: bridge
+
+volumes:
+  postgis_data:
+  minio_data:
+  rabbitmq_data:
