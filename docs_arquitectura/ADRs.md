@@ -38,3 +38,24 @@ Implementar el patrón **Transactional Outbox**. FastAPI guardará los datos esp
 ## Consequences
 *   **Positive:** Fuerte consistencia y total desacoplamiento de la disponibilidad inmediata de RabbitMQ desde el endpoint de consumo de la PWA.
 *   **Negative:** Incrementa la carga transaccional de PostgreSQL y requiere el desarrollo de un servicio "Relay" o el uso de una herramienta Change Data Capture (CDC).
+
+---
+
+# ADR-003: Autenticación Stateless con JWT para operarios offline
+
+## Status
+Accepted
+
+## Context
+El sistema requiere autenticar a los técnicos que realizan las inspecciones, pero la PWA opera mayormente en modo offline. Depender de sesiones del lado del servidor o re-validación constante bloquearía el trabajo en campo. A su vez, se necesita asegurar la trazabilidad de quién generó qué dato.
+
+## Decision
+Uso de **JWT (JSON Web Token)** con un tiempo de vida extendido (ej. 7 días) o esquema de Refresh Tokens. El login inicial y la obtención del token deben hacerse obligatoriamente con conexión (online).
+
+## Rationale
+*   **Delegación de confianza:** El token autofirmado permite a la PWA operar sin tener que contactar al servidor para validar al usuario durante todo su turno/semana.
+*   **Trazabilidad Offline:** La PWA extrae el `tecnico_id` del JWT y lo adjunta a los eventos `inspeccion.creada`, manteniendo la autoría incluso si se sincroniza días después.
+
+## Consequences
+*   **Positive:** Soporte nativo para trabajo desconectado; infraestructura backend *stateless*.
+*   **Negative (Crítica):** Si el token expira mientras hay envíos pendientes en la cola (Background Sync), la solicitud al backend fallará (401 Unauthorized). La PWA **debe** estar programada para interceptar este 401, pausar la sincronización, pedir re-autenticación al usuario y reanudar la cola sin perder ningún dato.
