@@ -38,3 +38,12 @@ class SqlAlchemyUserRepository(UserRepository):
     def get_by_id(self, id: uuid.UUID) -> Optional[User]:
         model = self.session.query(UserModel).filter(UserModel.id == id).first()
         return self._to_domain(model)
+
+    def update(self, user: User) -> None:
+        model = self.session.query(UserModel).filter(UserModel.id == user.id).first()
+        if model:
+            model.email = user.email
+            model.nombre = user.full_name
+            model.password_hash = user.hashed_password
+            model.rol = user.role
+            self.session.commit()

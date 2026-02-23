@@ -1,6 +1,5 @@
-feat(auth): Implement JWT authentication and identity domain
+feat(api): Implement user profile update and password change
 
-Add user domain entities and PostgreSQL repository implementation.
-Integrate passlib and python-jose to enforce JWT authentication.
-Refactor inspection creation to extract technician ID from secure token.
-Update related TDD test suites fixing dependency override pollution.
+Adds the PATCH /users/me endpoint allowing authenticated technicians to update their profiles.
+Implements UpdateUserUseCase with email collision validation and conditional password hashing using passlib.
+Adds comprehensive TDD test coverage for profile edits, identity collision, and security boundaries.

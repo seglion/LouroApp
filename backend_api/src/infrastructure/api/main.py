@@ -10,12 +10,35 @@ from src.application.login_user import LoginUserUseCase
 from src.infrastructure.api.dependencies import get_current_user
 from src.domain.entities import Inspeccion, CoordenadasUTM, Acometida
 from src.domain.user_entities import User
-from src.infrastructure.api.schemas import InspeccionRequest
+from src.infrastructure.api.schemas import InspeccionRequest, InspeccionUpdate, UserUpdate
+from src.application.update_user import UpdateUserUseCase
 
 # ... Create tables (just in case) ...
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="LouroApp API", version="1.0.0")
+
+def get_update_user_use_case(db: Session = Depends(get_db)):
+    repository = SqlAlchemyUserRepository(db)
+    return UpdateUserUseCase(repository)
+
+@app.patch("/users/me")
+def update_profile(
+    request: UserUpdate,
+    use_case: UpdateUserUseCase = Depends(get_update_user_use_case),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+         # Pydantic nos dará None si el campo no se envio gracias a todos los fields de update opcionales.
+         use_case.execute(
+             current_user,
+             full_name=request.full_name,
+             email=request.email,
+             new_password=request.password
+         )
+         return {"message": "Perfil actualizado correctamente"}
+    except ValueError as e:
+         raise HTTPException(status_code=400, detail=str(e))
 
 def get_login_use_case(db: Session = Depends(get_db)):
     repository = SqlAlchemyUserRepository(db)

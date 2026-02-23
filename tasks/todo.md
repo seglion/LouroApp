@@ -23,3 +23,10 @@
 - [x] Minitarea 4: Implementar dependencias API `src/infrastructure/api/dependencies.py` (`get_current_user`).
 - [x] Minitarea 5: Testing (TDD RED): `tests/test_auth_flow.py`.
 - [x] Minitarea 6: Refactor de `POST /inspecciones` y schema para obtener el `tecnico_id` del JWT.
+## Fase 5: Actualización de Perfil (Update User)
+- [x] Minitarea 1: Añadir `update(user: User)` a `src/domain/user_repository_interface.py`.
+- [x] Minitarea 2: Crear el schema `UserUpdate` en `src/infrastructure/api/schemas.py`.
+- [x] Minitarea 3: Implementar update() en `src/infrastructure/db/user_repository.py`.
+- [x] Minitarea 4: Crear Caso de Uso `src/application/update_user.py` con re-hashing condicional.
+- [x] Minitarea 5: Fase TDD RED: Crear `tests/test_user_update.py` con tests de name change y auth invalidation.
+- [x] Minitarea 6: Añadir Endpoint PATCH `/users/me` en `main.py` protegido por `get_current_user`.

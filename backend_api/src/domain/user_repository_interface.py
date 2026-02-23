@@ -15,3 +15,7 @@ class UserRepository(ABC):
     @abstractmethod
     def get_by_id(self, id: uuid.UUID) -> Optional[User]:
         pass
+
+    @abstractmethod
+    def update(self, user: User) -> None:
+        pass

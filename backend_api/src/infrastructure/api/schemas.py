@@ -93,3 +93,8 @@ class InspeccionUpdate(BaseModel):
     ruta_foto_interior: Optional[str] = None
     observaciones: Optional[str] = None
     acometidas: Optional[List[AcometidaData]] = None
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = Field(None, max_length=255)
+    full_name: Optional[str] = Field(None, max_length=255)
+    password: Optional[str] = Field(None, min_length=6, max_length=100)
