@@ -35,6 +35,28 @@ services:
       - gis_dev_net
     restart: unless-stopped
 
+  api:
+    build:
+      context: ./backend_api
+      dockerfile: Dockerfile
+    container_name: gis_saneamiento_api
+    env_file:
+      - .env
+    environment:
+      # Sobrescribimos el host para que use el nombre del contenedor en la red de docker
+      POSTGRES_HOST: postgis
+      POSTGRES_PORT: 5432
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgis
+    networks:
+      - gis_dev_net
+    restart: unless-stopped
+    volumes:
+      # Sincronización en tiempo real para desarrollo (Hot Reload)
+      - ./backend_api:/app
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: gis_saneamiento_rabbit
