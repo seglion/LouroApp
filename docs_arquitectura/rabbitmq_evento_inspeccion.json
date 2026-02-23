@@ -1,0 +1,67 @@
+{
+  "event_id": "018e6ec2-f32a-7bbc-9f3e-8e4d2a1b9c88",
+  "event_type": "inspeccion.creada",
+  "routing_key": "inspeccion.creada",
+  "timestamp": "2026-02-23T12:07:21Z",
+  "payload": {
+    "pozo": {
+      "id": "018e6ec2-b1fa-7eac-8c1d-1b2c3d4e5f6a",
+      "id_pozo": "P-4501",
+      "coordenadas_utm": {
+        "epsg": 25829,
+        "x": 535492.31,
+        "y": 4801123.54
+      },
+      "fecha_inspec": "2026-02-23",
+      "calle_zona": "Av. Principal esq. Calle Falsa",
+      "situacion": "Calzada",
+      "cota_tapa": 12.345,
+      "profundidad_m": 2.10,
+      "estado": "BUENO",
+      "material_pozo": "HORMIGON",
+      "tipo_acceso": "LIBRE",
+      "num_pates": 5,
+      "forma_pozo": "CIRCULAR",
+      "diametro_pozo_mm": 1000,
+      "largo_pozo_mm": null,
+      "ancho_pozo_mm": null,
+      "resalto": "NO",
+      "filtraciones": "LEVES",
+      "pluviales": "NO",
+      "biofilm": "PRESENTE",
+      "tapa_forma": "CIRCULAR",
+      "tapa_tipo": "ABISAGRADA",
+      "tapa_material": "FUNDICION",
+      "tapa_diametro_mm": 600,
+      "tapa_largo_mm": null,
+      "tapa_ancho_mm": null,
+      "red_tipo": "SANEAMIENTO",
+      "red_viene_de_pozo": "P-4500",
+      "red_va_a_pozo": "P-4502",
+      "red_carga": "GRAVEDAD",
+      "colector_mat_entrada": "PVC",
+      "colector_diametro_entrada_mm": 315,
+      "colector_mat_salida": "PVC",
+      "colector_diametro_salida_mm": 400,
+      "ruta_foto_situacion": "s3://gis-captures/pozos/018e6ec2-b1fa-7eac-8c1d-1b2c3d4e5f6a_situacion.jpg",
+      "ruta_foto_interior": "s3://gis-captures/pozos/018e6ec2-b1fa-7eac-8c1d-1b2c3d4e5f6a_interior.jpg",
+      "observaciones": "Se evidencian leves filtraciones en cota -1.5m, pates en buen estado."
+    },
+    "acometidas": [
+      {
+        "id": "018e6ec2-d45b-7f12-9c3b-12a3b4c5d6e7",
+        "numero_acometida": 1,
+        "material": "PVC",
+        "diametro_mm": 200,
+        "profundidad_m": 1.25
+      },
+      {
+        "id": "018e6ec2-f112-7e44-8a1a-a1b2c3d4e5f6",
+        "numero_acometida": 2,
+        "material": "HORMIGON",
+        "diametro_mm": 250,
+        "profundidad_m": 1.50
+      }
+    ]
+  }
+}

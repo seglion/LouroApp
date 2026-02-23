@@ -1,0 +1,168 @@
+openapi: 3.1.0
+info:
+  title: API GIS Saneamiento - Recolección Field (Fase 0)
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /inspecciones:
+    post:
+      summary: Registra una nueva inspección de pozo con sus acometidas.
+      operationId: procesarInspeccion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspeccionRequest'
+      responses:
+        '201':
+          description: Inspección guardada y evento publicado en Outbox.
+components:
+  schemas:
+    CoordenadasUTM:
+      type: object
+      description: Coordenadas proyectadas en UTM ETRS89 Huso 29N (EPSG:25829)
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: number
+          format: double
+          description: Este (Easting) en metros.
+        y:
+          type: number
+          format: double
+          description: Norte (Northing) en metros.
+
+    AcometidaData:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        numero_acometida:
+          type: integer
+        material:
+          type: string
+          maxLength: 50
+        diametro_mm:
+          type: integer
+        profundidad_m:
+          type: number
+          format: float
+
+    InspeccionRequest:
+      type: object
+      required:
+        - id
+        - id_pozo
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUIDv7 generado localmente en la PWA.
+        id_pozo:
+          type: string
+          maxLength: 50
+        coordenadas_utm:
+          $ref: '#/components/schemas/CoordenadasUTM'
+        fecha_inspec:
+          type: string
+          format: date
+        calle_zona:
+          type: string
+          maxLength: 255
+        situacion:
+          type: string
+          maxLength: 100
+        cota_tapa:
+          type: number
+          format: float
+        profundidad_m:
+          type: number
+          format: float
+        estado:
+          type: string
+          maxLength: 50
+        material_pozo:
+          type: string
+          maxLength: 50
+        tipo_acceso:
+          type: string
+          maxLength: 50
+        num_pates:
+          type: integer
+        forma_pozo:
+          type: string
+          maxLength: 50
+        diametro_pozo_mm:
+          type: integer
+        largo_pozo_mm:
+          type: integer
+        ancho_pozo_mm:
+          type: integer
+        resalto:
+          type: string
+          maxLength: 50
+        filtraciones:
+          type: string
+          maxLength: 50
+        pluviales:
+          type: string
+          maxLength: 50
+        biofilm:
+          type: string
+          maxLength: 50
+        tapa_forma:
+          type: string
+          maxLength: 50
+        tapa_tipo:
+          type: string
+          maxLength: 50
+        tapa_material:
+          type: string
+          maxLength: 50
+        tapa_diametro_mm:
+          type: integer
+        tapa_largo_mm:
+          type: integer
+        tapa_ancho_mm:
+          type: integer
+        red_tipo:
+          type: string
+          maxLength: 50
+        red_viene_de_pozo:
+          type: string
+          maxLength: 50
+        red_va_a_pozo:
+          type: string
+          maxLength: 50
+        red_carga:
+          type: string
+          maxLength: 50
+        colector_mat_entrada:
+          type: string
+          maxLength: 50
+        colector_diametro_entrada_mm:
+          type: integer
+        colector_mat_salida:
+          type: string
+          maxLength: 50
+        colector_diametro_salida_mm:
+          type: integer
+        ruta_foto_situacion:
+          type: string
+          description: URI o ruta del archivo almacenado en MinIO
+        ruta_foto_interior:
+          type: string
+          description: URI o ruta del archivo almacenado en MinIO
+        observaciones:
+          type: string
+        acometidas:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcometidaData'
