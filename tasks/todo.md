@@ -30,3 +30,17 @@
 - [x] Minitarea 4: Crear Caso de Uso `src/application/update_user.py` con re-hashing condicional.
 - [x] Minitarea 5: Fase TDD RED: Crear `tests/test_user_update.py` con tests de name change y auth invalidation.
 - [x] Minitarea 6: Añadir Endpoint PATCH `/users/me` en `main.py` protegido por `get_current_user`.
+
+## Fase 6: Políticas de Autorización
+- [x] Minitarea 1: Crear `src/domain/policies.py` con `ForbiddenError` y reglas puras (RBAC/ABAC).
+- [x] Minitarea 2: Refactorizar `UpdateInspeccionUseCase` y `UpdateUserUseCase` con checks de políticas.
+- [x] Minitarea 3: Crear `CreateUserUseCase` protegido para ADMINs.
+- [x] Minitarea 4: Añadir `exception_handler` para `ForbiddenError` en `src/infrastructure/api/main.py` -> HTTP 403.
+- [x] Minitarea 5: Fase TDD RED: Crear `tests/test_authorization.py` con 4 tests granulares de seguridad.
+
+## Fase 7: Mensajería Asíncrona (RabbitMQ)
+- [ ] Minitarea 1: Crear `src/domain/events.py` con el DTO `InspeccionCreadaEvent`.
+- [ ] Minitarea 2: Crear abstracción `src/domain/event_publisher_interface.py` con `publish()`.
+- [ ] Minitarea 3: Modificar `RegisterInspeccionUseCase` para publicar el evento y testearlo (TDD Green) aislando failures.
+- [ ] Minitarea 4: Añadir `pika` a requirements e implementar `src/infrastructure/events/rabbitmq_publisher.py`.
+- [ ] Minitarea 5: Inyectar publicador en `main.py` para el endpoint POST `/inspecciones`.

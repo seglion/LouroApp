@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -8,15 +9,32 @@ from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
 from src.application.register_inspeccion import RegisterInspeccionUseCase
 from src.application.login_user import LoginUserUseCase
 from src.infrastructure.api.dependencies import get_current_user
+from src.domain.policies import ForbiddenError
 from src.domain.entities import Inspeccion, CoordenadasUTM, Acometida
-from src.domain.user_entities import User
+from src.domain.user_entities import User, Role
 from src.infrastructure.api.schemas import InspeccionRequest, InspeccionUpdate, UserUpdate
+from pydantic import BaseModel, Field, EmailStr
 from src.application.update_user import UpdateUserUseCase
+from src.application.create_user import CreateUserUseCase
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    full_name: str = Field(..., max_length=255)
+    password: str = Field(..., min_length=6, max_length=100)
+    role: Role
+
 
 # ... Create tables (just in case) ...
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="LouroApp API", version="1.0.0")
+
+@app.exception_handler(ForbiddenError)
+async def forbidden_exception_handler(request: Request, exc: ForbiddenError):
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": str(exc)},
+    )
 
 def get_update_user_use_case(db: Session = Depends(get_db)):
     repository = SqlAlchemyUserRepository(db)
@@ -31,7 +49,8 @@ def update_profile(
     try:
          # Pydantic nos dará None si el campo no se envio gracias a todos los fields de update opcionales.
          use_case.execute(
-             current_user,
+             target_user=current_user,
+             current_user=current_user,
              full_name=request.full_name,
              email=request.email,
              new_password=request.password
@@ -39,6 +58,28 @@ def update_profile(
          return {"message": "Perfil actualizado correctamente"}
     except ValueError as e:
          raise HTTPException(status_code=400, detail=str(e))
+
+def get_create_user_use_case(db: Session = Depends(get_db)):
+    repository = SqlAlchemyUserRepository(db)
+    return CreateUserUseCase(repository)
+
+@app.post("/users", status_code=status.HTTP_201_CREATED)
+def create_user(
+    request: UserCreate,
+    use_case: CreateUserUseCase = Depends(get_create_user_use_case),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        new_user = use_case.execute(
+            current_user=current_user,
+            email=request.email,
+            full_name=request.full_name,
+            password=request.password,
+            role=request.role
+        )
+        return {"id": str(new_user.id), "email": new_user.email, "role": new_user.role}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 def get_login_use_case(db: Session = Depends(get_db)):
     repository = SqlAlchemyUserRepository(db)
@@ -160,7 +201,8 @@ def update_inspeccion(
     inspeccion_id: UUID, 
     request: InspeccionUpdate,
     get_use_case: GetInspeccionUseCase = Depends(get_get_inspeccion_use_case),
-    update_use_case: UpdateInspeccionUseCase = Depends(get_update_inspeccion_use_case)
+    update_use_case: UpdateInspeccionUseCase = Depends(get_update_inspeccion_use_case),
+    current_user: User = Depends(get_current_user)
 ):
     current = get_use_case.get_by_id(inspeccion_id)
     if not current:
@@ -191,7 +233,7 @@ def update_inspeccion(
         setattr(current, key, value)
         
     try:
-        updated = update_use_case.execute(current)
+        updated = update_use_case.execute(current, current_user)
         return {"status": "updated", "id": str(updated.id)}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

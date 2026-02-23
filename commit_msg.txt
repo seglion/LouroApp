@@ -1,5 +1,6 @@
-feat(api): Implement user profile update and password change
+feat(auth): Implement IAM policies and project phases
 
-Adds the PATCH /users/me endpoint allowing authenticated technicians to update their profiles.
-Implements UpdateUserUseCase with email collision validation and conditional password hashing using passlib.
-Adds comprehensive TDD test coverage for profile edits, identity collision, and security boundaries.
+Add role-based access control (RBAC) rules to domain policies securing inspections and user profiles.
+Enforce IAM checks in use cases and handle ForbiddenError uniformly in the API layer.
+Include new comprehensive TDD test suite for authorization rules.
+Add architectural phases documentation to track hybrid platform development.
