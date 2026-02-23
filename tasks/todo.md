@@ -1,7 +1,9 @@
-# Plan de Tareas: Fase 3 - Dockerización del Backend & Testing
+# Plan de Tareas: Fase 2 - Caso de Uso "Registrar Inspección"
 
-- [ ] Crear `backend_api/Dockerfile` y `.dockerignore` para el microservicio FastAPI.
-- [ ] Configurar configuración básica de pruebas (`pytest.ini`).
-- [ ] Actualizar `docker-compose.yml` para incluir el servicio `backend_api` y conectarlo a la base de datos.
-- [ ] Ejecutar las pruebas unitarias (`pytest`) para validar que el endpoint `/health` y TDD funcionan correctamente.
-- [ ] Revisión Final: Verificar que FastAPI arranca correctamente en Docker y responde a peticiones.
+- [x] Definir `src/domain/entities.py` y `src/domain/repository_interface.py`.
+- [x] Implementar `src/application/register_inspeccion.py` (Caso de Uso).
+- [x] Crear `src/infrastructure/db/models.py` (SQLAlchemy).
+- [x] Crear `src/infrastructure/db/sqlalchemy_repository.py`.
+- [x] Crear los schemas de `pydantic` en `src/infrastructure/api/schemas.py`.
+- [x] Escribir prueba TDD (RED): `tests/test_register_inspeccion.py`.
+- [x] Implementar endpoint POST en `src/infrastructure/api/main.py`.
