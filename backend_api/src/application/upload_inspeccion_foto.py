@@ -5,10 +5,15 @@ from src.domain.policies import can_edit_inspeccion, ForbiddenError
 from src.domain.user_entities import User
 from src.infrastructure.storage.minio_client import MinioStorageClient
 
+from src.domain.event_publisher_interface import EventPublisher
+from src.domain.events import InspeccionActualizadaEvent
+from datetime import datetime
+
 class UploadInspeccionFotoUseCase:
-    def __init__(self, repository: InspeccionRepository, storage: MinioStorageClient):
+    def __init__(self, repository: InspeccionRepository, storage: MinioStorageClient, event_publisher: EventPublisher = None):
         self.repository = repository
         self.storage = storage
+        self.event_publisher = event_publisher
 
     def execute(self, inspeccion_id: uuid.UUID, file_data, file_name: str, content_type: str, current_user: User) -> list[str]:
         # 1. Recuperar la inspección
@@ -41,5 +46,19 @@ class UploadInspeccionFotoUseCase:
 
         # 6. Guardar cambios en la Base de Datos
         self.repository.update(inspeccion)
+
+        # 7. Notificar actualización (opcional si hay publicador)
+        if self.event_publisher:
+            try:
+                evento = InspeccionActualizadaEvent(
+                    id_inspeccion=inspeccion.id,
+                    id_pozo=inspeccion.id_pozo,
+                    tecnico_id=inspeccion.tecnico_id,
+                    timestamp=datetime.utcnow(),
+                    inspeccion=inspeccion
+                )
+                self.event_publisher.publish(evento)
+            except Exception:
+                pass # No bloqueamos la subida por fallo en mensajería
 
         return inspeccion.foto_keys

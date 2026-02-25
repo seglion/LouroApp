@@ -37,7 +37,8 @@ class RegisterInspeccionUseCase:
                     id_inspeccion=inspeccion.id,
                     id_pozo=inspeccion.id_pozo,
                     tecnico_id=inspeccion.tecnico_id,
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.utcnow(),
+                    inspeccion=inspeccion
                 )
                 self.event_publisher.publish(evento)
             except Exception as e:

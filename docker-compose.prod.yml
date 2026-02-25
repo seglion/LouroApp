@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Proxy Inverso con SSL Automático
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: production_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    networks:
+      - production_net
+    restart: always
+
+  ssl-companion:
+    image: nginxproxy/acme-companion
+    container_name: production_ssl_helper
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=admin@aquaticaingenieria.com
+    depends_on:
+      - nginx-proxy
+    networks:
+      - production_net
+    restart: always
+
+  # Backend API
+  api:
+    build:
+      context: ./backend_api
+      dockerfile: Dockerfile
+    container_name: louro_api_prod
+    environment:
+      - VIRTUAL_HOST=louro-api.aquaticaingenieria.com
+      - LETSENCRYPT_HOST=louro-api.aquaticaingenieria.com
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - MINIO_ENDPOINT=minio:9000
+    depends_on:
+      - db
+    networks:
+      - production_net
+    restart: unless-stopped
+
+  # Frontend PWA
+  frontend:
+    build:
+      context: ./frontend_pwa
+      dockerfile: Dockerfile.prod
+    container_name: louro_frontend_prod
+    environment:
+      - VIRTUAL_HOST=louro.aquaticaingenieria.com
+      - LETSENCRYPT_HOST=louro.aquaticaingenieria.com
+    networks:
+      - production_net
+    restart: unless-stopped
+
+  # Persistencia
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: louro_db_prod
+    volumes:
+      - postgis_prod_data:/var/lib/postgresql/data
+    networks:
+      - production_net
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: louro_minio_prod
+    command: server /data --console-address ":9001"
+    environment:
+      - VIRTUAL_HOST=minio.aquaticaingenieria.com
+      - VIRTUAL_PORT=9001
+      - LETSENCRYPT_HOST=minio.aquaticaingenieria.com
+    volumes:
+      - minio_prod_data:/data
+    networks:
+      - production_net
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: louro_rabbit_prod
+    networks:
+      - production_net
+    restart: unless-stopped
+
+networks:
+  production_net:
+    driver: bridge
+
+volumes:
+  postgis_prod_data:
+  minio_prod_data:
+  certs:
+  vhost:
+  html:
+  acme:

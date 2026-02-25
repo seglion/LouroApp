@@ -117,10 +117,11 @@ def get_minio_client():
 
 def get_upload_inspeccion_foto_use_case(
     db: Session = Depends(get_db),
-    storage: MinioStorageClient = Depends(get_minio_client)
+    storage: MinioStorageClient = Depends(get_minio_client),
+    publisher: EventPublisher = Depends(get_event_publisher)
 ):
     repository = SqlAlchemyInspeccionRepository(db)
-    return UploadInspeccionFotoUseCase(repository, storage)
+    return UploadInspeccionFotoUseCase(repository, storage, publisher)
 
 @app.post("/inspecciones/{inspeccion_id}/photos", status_code=status.HTTP_201_CREATED)
 def upload_foto(

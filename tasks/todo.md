@@ -24,6 +24,12 @@
 ## Revisión Final y Documentación
 - [x] Levantar entorno de pruebas local (Rabbit + MinIO dockerizados) para E2E simulado.
 - [x] Verificación de seguridad y linting del worker (`flake8`, `bandit`).
+- [x] Parametrizar ruta física de datos mediante variable de entorno `WORKER_DATA_PATH`.
+- [x] Configurar volumen CIFS para acceso real a unidad de red remota (X:).
+- [x] Ejecutar "Prueba de Fuego": Limpieza total, reinicio de servicios y validación E2E integral.
+    - [x] Limpiar volúmenes Docker y archivos físicos de prueba en X:.
+    - [x] Reiniciar stack completo (RabbitMQ, MinIO, Worker).
+    - [x] Ejecutar simulación de inspección y verificar persistencia y logs.
 
 ---
 <details>

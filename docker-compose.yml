@@ -19,7 +19,7 @@ services:
 
   minio:
     image: minio/minio
-    container_name: gis_saneamiento_minio
+    container_name: gis-saneamiento-minio
     env_file:
       - .env
     environment:
@@ -48,7 +48,7 @@ services:
       POSTGRES_HOST: postgis
       POSTGRES_PORT: 5432
       # MinIO endpoint dentro de la red Docker
-      MINIO_ENDPOINT: minio:9000
+      MINIO_ENDPOINT: gis-saneamiento-minio:9000
     ports:
       - "8000:8000"
     depends_on:

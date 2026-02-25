@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import pika
 import time
 import json
@@ -31,26 +32,41 @@ RABBITMQ_USER = os.getenv('RABBITMQ_USER', 'guest')
 RABBITMQ_PASS = os.getenv('RABBITMQ_PASS', 'guest')
 
 # Configuración a través de Entorno (MinIO)
-MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'minio:9000')
-MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
-MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
-MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'gis-captures')
+MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'gis-saneamiento-minio:9000').strip()
+MINIO_ACCESS_KEY = os.getenv('MINIO_ROOT_USER', os.getenv('MINIO_ACCESS_KEY', 'minioadmin')).strip()
+MINIO_SECRET_KEY = os.getenv('MINIO_ROOT_PASSWORD', os.getenv('MINIO_SECRET_KEY', 'minioadmin')).strip()
+MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'gis-captures').strip()
 MINIO_SECURE = os.getenv('MINIO_SECURE', 'false').lower() == 'true'
 APP_DATA_DIR = os.getenv('APP_DATA_DIR', '/app/data')
-EXCHANGE_NAME = 'gis_events_exchange'
+DB_DIR = os.getenv('DB_DIR', '/app/db')  # Nueva carpeta para evitar bloqueos en red (CIFS)
+DB_PATH = os.path.join(DB_DIR, 'idempotency.db')
+HOST_DATA_PATH = os.getenv('HOST_DATA_PATH', 'X:') # Ruta base en el Host (Windows/Samba)
+
+def translate_to_host_path(local_path: str) -> str:
+    """Traduce una ruta interna /app/data/... a una ruta de Windows X:\..."""
+    if not local_path:
+        return ""
+    # Normalizamos el separador a Windows si el Host base parece ser Windows
+    path = local_path.replace(APP_DATA_DIR, HOST_DATA_PATH)
+    if "\\" in HOST_DATA_PATH or ":" in HOST_DATA_PATH or HOST_DATA_PATH.startswith("//"):
+        path = path.replace("/", "\\")
+        # Corregir dobles barras si ocurren por el replace inicial, excepto al inicio de UNC
+        if not path.startswith("\\\\"):
+            path = path.replace("\\\\", "\\")
+    return path
+
+EXCHANGE_NAME = 'inspecciones.v1'
 QUEUE_NAME = 'worker_on_premise_queue'
 ROUTING_KEY = 'inspeccion.*'
 
 # ---------------------------------------------------------
 # Idempotencia: Base de datos SQLite local
 # ---------------------------------------------------------
-DB_PATH = os.path.join(APP_DATA_DIR, 'idempotency.db')
-
 def init_db():
     """
-    Inicializa la base de datos local SQLite para control de idempotencia.
+    Inicializa la base de datos local SQLite para control de idempotencia en un storage fiable.
     """
-    os.makedirs(APP_DATA_DIR, exist_ok=True)
+    os.makedirs(DB_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -93,15 +109,16 @@ def process_message(ch, method, properties, body):
     """
     try:
         message = json.loads(body)
-        event_id = message.get("event_id")
-        
+        metadata = message.get("metadata", {})
+        event_id = metadata.get("event_id")
+        event_type = metadata.get("event_type")
+
         if not event_id:
-            logger.error("Mensaje malformado: no contiene 'event_id'. Descartando.")
-            # Hacemos ACK porque el mensaje está roto y no queremos que se encole infinitamente.
+            logger.error(f"Mensaje malformado: no contiene 'event_id'. Body: {body}")
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
 
-        logger.info(f"📝 Recibido evento [{event_id}] (Tipo: {message.get('event_type')})")
+        logger.info(f"📝 Recibido evento [{event_id}] (Tipo: {event_type})")
 
         # 1. VERIFICACIÓN DE IDEMPOTENCIA
         if is_event_processed(event_id):
@@ -109,8 +126,7 @@ def process_message(ch, method, properties, body):
             ch.basic_ack(delivery_tag=method.delivery_tag)
             return
 
-        # 2. PROCESO DE INTEGRACIÓN (Hitos 3 y 4 se engancharán aquí)
-        # 1. DESCARGA DE IMÁGENES (Hito 3)
+        # 2. PROCESO DE INTEGRACIÓN
         payload = message.get("payload", {})
         pozo = payload.get("pozo", {})
         id_pozo = pozo.get("id_pozo", "POZO_DESCONOCIDO")
@@ -135,14 +151,26 @@ def process_message(ch, method, properties, body):
             endpoint_url=f"http{'s' if MINIO_SECURE else ''}://{MINIO_ENDPOINT}",
             aws_access_key_id=MINIO_ACCESS_KEY,
             aws_secret_access_key=MINIO_SECRET_KEY,
-            region_name='us-east-1' # Default for MinIO compat
+            config=boto3.session.Config(signature_version='s3v4'),
+            region_name='us-east-1'
         )
 
         urls_a_descargar = []
-        if pozo.get("ruta_foto_situacion"):
-            urls_a_descargar.append(pozo["ruta_foto_situacion"])
-        if pozo.get("ruta_foto_interior"):
-            urls_a_descargar.append(pozo["ruta_foto_interior"])
+        # Si la API envía 'foto_keys', las usamos. Si no, probamos con los campos antiguos (retrocompatibilidad)
+        foto_keys = pozo.get("foto_keys", [])
+        for key in foto_keys:
+            # Si el key ya es una URI completa s3://... la usamos, si no, la construimos.
+            if key.startswith("s3://"):
+                urls_a_descargar.append(key)
+            else:
+                urls_a_descargar.append(f"s3://{MINIO_BUCKET}/{key}")
+
+        # Retrocompatibilidad con campos específicos si no hay foto_keys
+        if not urls_a_descargar:
+            if pozo.get("ruta_foto_situacion"):
+                urls_a_descargar.append(pozo["ruta_foto_situacion"])
+            if pozo.get("ruta_foto_interior"):
+                urls_a_descargar.append(pozo["ruta_foto_interior"])
 
         for uri in urls_a_descargar:
             # Ejemplo URI esperado: "s3://gis-captures/pozos/018e6ec2..._situacion.jpg"
@@ -170,23 +198,40 @@ def process_message(ch, method, properties, body):
         # --------------------------------------------------
         # HITO 4: GENERACIÓN Y ACTUALIZACIÓN DE CAPAS (GeoPackage)
         # --------------------------------------------------
-        gpkg_path = os.path.join(APP_DATA_DIR, "Inspecciones_Recientes.gpkg")
+        # ESTRATEGIA: Para evitar "database is locked" en CIFS, trabajamos en LOCAL y luego subimos.
+        remote_gpkg_path = os.path.join(APP_DATA_DIR, "Inspecciones_Recientes.gpkg")
+        local_gpkg_path = os.path.join(DB_DIR, "Inspecciones_Recientes_Buffer.gpkg")
         
-        # Mapeamos las variables requeridas.
         coord = pozo.get("coordenadas_utm", {})
         x_val = coord.get("x")
         y_val = coord.get("y")
         epsg = coord.get("epsg", 25829)
 
-        # Solo guardamos si tenemos geometría válida
         if x_val is not None and y_val is not None:
             geom = Point(x_val, y_val)
             
-            # Carga EXHAUSTIVA de 39 atributos según Fase 0
-            # Evitamos NaTs/nullable types de pandas convirtiendo None a v nativo
             def clean_val(key, default=None):
                 v = pozo.get(key)
                 return v if v is not None else default
+
+            # Lógica inteligente para asignar fotos a campos específicos
+            foto_keys = pozo.get("foto_keys", [])
+            path_situacion = ""
+            path_interior = ""
+            
+            for key in foto_keys:
+                filename = key.split("/")[-1]
+                full_local_path = os.path.join(download_dir, filename)
+                if "_situacion" in filename.lower():
+                    path_situacion = full_local_path
+                elif "_interior" in filename.lower() or "_pozo" in filename.lower():
+                    path_interior = full_local_path
+            
+            # Fallback a campos antiguos por si acaso
+            if not path_situacion and pozo.get("ruta_foto_situacion"):
+                path_situacion = os.path.join(download_dir, pozo.get("ruta_foto_situacion", "").split("/")[-1])
+            if not path_interior and pozo.get("ruta_foto_interior"):
+                path_interior = os.path.join(download_dir, pozo.get("ruta_foto_interior", "").split("/")[-1])
 
             row_data = {
                 "id": clean_val("id", ""),
@@ -222,8 +267,8 @@ def process_message(ch, method, properties, body):
                 "colector_diametro_entrada_mm": int(pozo.get("colector_diametro_entrada_mm") or 0),
                 "colector_mat_salida": clean_val("colector_mat_salida", ""),
                 "colector_diametro_salida_mm": int(pozo.get("colector_diametro_salida_mm") or 0),
-                "ruta_foto_situacion": os.path.join(download_dir, pozo.get("ruta_foto_situacion", "").split("/")[-1]) if pozo.get("ruta_foto_situacion") else "",
-                "ruta_foto_interior": os.path.join(download_dir, pozo.get("ruta_foto_interior", "").split("/")[-1]) if pozo.get("ruta_foto_interior") else "",
+                "ruta_foto_situacion": translate_to_host_path(path_situacion),
+                "ruta_foto_interior": translate_to_host_path(path_interior),
                 "observaciones": clean_val("observaciones", ""),
                 "geometry": geom
             }
@@ -232,7 +277,6 @@ def process_message(ch, method, properties, body):
             row_data["num_acometidas"] = len(acometidas)
             row_data["acometidas_json"] = json.dumps(acometidas) if acometidas else ""
 
-            # Sanitización y persistencia directa vía Fiona (evita dtypes complejos de pandas)
             schema = {
                 "geometry": "Point",
                 "properties": {
@@ -252,17 +296,33 @@ def process_message(ch, method, properties, body):
                 }
             }
 
-            mode = "a" if os.path.exists(gpkg_path) else "w"
-            logger.info(f"🗺️  {'Actualizando' if mode == 'a' else 'Creando'} registro GIS en {gpkg_path}")
+            if os.path.exists(remote_gpkg_path) and os.path.getsize(remote_gpkg_path) > 0:
+                shutil.copy2(remote_gpkg_path, local_gpkg_path)
             
-            with fiona.open(gpkg_path, mode, driver="GPKG", schema=schema, crs=f"EPSG:{epsg}", layer="pozos_inspeccionados") as layer:
-                # Preparamos las propiedades filtrando la geometría y asegurando tipos nativos
-                props = {k: v for k, v in row_data.items() if k != "geometry"}
-                layer.write({
-                    "geometry": mapping(geom),
-                    "properties": props
-                })
+            # LÓGICA DE UPSERT: Si existe, lo borramos y escribimos el nuevo
+            existing_features = []
+            if os.path.exists(local_gpkg_path):
+                try:
+                    with fiona.open(local_gpkg_path, "r") as source:
+                        # Guardamos todos los que NO coincidan con nuestro ID
+                        for feature in source:
+                            if feature["properties"].get("id") != row_data["id"]:
+                                existing_features.append(feature)
+                except Exception as e:
+                    logger.warning(f"No se pudo leer GPKG existente para Upsert: {e}")
 
+            logger.info(f"🗺️  Actualizando buffer GIS local (Upsert)...")
+            # Escribimos de nuevo (modo 'w' para sobreescribir con la lista filtrada + el nuevo)
+            with fiona.open(local_gpkg_path, "w", driver="GPKG", schema=schema, crs=f"EPSG:{epsg}", layer="pozos_inspeccionados") as layer:
+                # Escribimos los existentes preservados
+                for feat in existing_features:
+                    layer.write(feat)
+                # Escribimos el nuevo/actualizado
+                props = {k: v for k, v in row_data.items() if k != "geometry"}
+                layer.write({"geometry": mapping(geom), "properties": props})
+
+            logger.info(f"📤 Sincronizando GeoPackage con unidad de red: {remote_gpkg_path}")
+            shutil.copy2(local_gpkg_path, remote_gpkg_path)
         else:
             logger.warning("No se incluyeron coordenadas espaciales válidas. Omitiendo volcado a GIS.")
 
@@ -315,7 +375,7 @@ def consume():
             channel.basic_qos(prefetch_count=1)
 
             # Consumo manual
-            channel.basic_consume(queue=QUEUE_NAME, on_message_callback=process_gis_message)
+            channel.basic_consume(queue=QUEUE_NAME, on_message_callback=process_message)
 
             logger.info(f"🎧 GIS Worker On-Premise escuchando eventos en la cola '{QUEUE_NAME}'...")
             channel.start_consuming()

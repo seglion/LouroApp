@@ -12,8 +12,10 @@ class CoordenadasUTM:
 @dataclass
 class Acometida:
     id: str
-    prof_m: Optional[float] = None
     material: Optional[str] = None
+    diametro_mm: Optional[int] = None
+    numero_acometida: Optional[int] = None
+    profundidad_m: Optional[float] = None
     pos_reloj: Optional[str] = None
 
 @dataclass

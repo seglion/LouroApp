@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from src.domain.events import InspeccionCreadaEvent
+from typing import Any
 
 class EventPublisher(ABC):
     @abstractmethod
-    def publish(self, event: InspeccionCreadaEvent) -> None:
+    def publish(self, event: Any) -> None:
         pass

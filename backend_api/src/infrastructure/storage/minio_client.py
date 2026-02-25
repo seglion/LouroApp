@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 class MinioStorageClient:
     def __init__(self):
-        endpoint = os.getenv("MINIO_ENDPOINT", "gis_saneamiento_minio:9000")
+        endpoint = os.getenv("MINIO_ENDPOINT", "gis-saneamiento-minio:9000")
         self.access_key = os.getenv("MINIO_ROOT_USER", "admin_minio")
         self.secret_key = os.getenv("MINIO_ROOT_PASSWORD", "minio_dev_pass")
-        self.bucket_name = os.getenv("MINIO_BUCKET", "inspecciones")
+        self.bucket_name = os.getenv("MINIO_BUCKET", "gis-captures")
         self.endpoint = endpoint
 
         self.client = Minio(

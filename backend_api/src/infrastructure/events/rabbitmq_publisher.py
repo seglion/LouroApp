@@ -23,33 +23,61 @@ class RabbitMQPublisher(EventPublisher):
         )
         return pika.BlockingConnection(parameters)
 
-    def publish(self, event: InspeccionCreadaEvent) -> None:
+    def publish(self, event: any) -> None:
         try:
+            from dataclasses import asdict
+            from datetime import datetime
+            import uuid
+            
+            def custom_serializer(obj):
+                if isinstance(obj, uuid.UUID):
+                    return str(obj)
+                if hasattr(obj, 'isoformat'):
+                    return obj.isoformat()
+                raise TypeError(f"Type {type(obj)} not serializable")
+
             connection = self._create_connection()
             channel = connection.channel()
             
-            # Asegurar exchange de tipo topic, durable
             channel.exchange_declare(exchange=self.exchange, exchange_type='topic', durable=True)
             
-            payload = {
-                "id_inspeccion": str(event.id_inspeccion),
-                "id_pozo": event.id_pozo,
-                "tecnico_id": str(event.tecnico_id),
-                "timestamp": event.timestamp.isoformat()
+            # Determinamos el tipo de evento para el routing_key y metadata
+            event_type = "inspeccion.creada"
+            routing_key = "inspeccion.creada"
+            
+            if hasattr(event, "__class__"):
+                class_name = event.__class__.__name__
+                if "Actualizada" in class_name:
+                    event_type = "inspeccion.actualizada"
+                    routing_key = "inspeccion.actualizada"
+            
+            # Estructura que espera el worker con idempotencia
+            # Usamos un UUID nuevo para CADA publicación, así el worker no lo ignora
+            message = {
+                "metadata": {
+                    "event_id": str(uuid.uuid4()),
+                    "event_type": event_type,
+                    "timestamp": datetime.utcnow().isoformat()
+                },
+                "payload": {
+                    "pozo": asdict(event.inspeccion)
+                }
             }
+            
+            body = json.dumps(message, default=custom_serializer)
             
             channel.basic_publish(
                 exchange=self.exchange,
-                routing_key="inspeccion.creada",
-                body=json.dumps(payload),
+                routing_key=routing_key,
+                body=body,
                 properties=pika.BasicProperties(
-                    delivery_mode=2,  # persistente
+                    delivery_mode=2,
                     content_type='application/json'
                 )
             )
             
             connection.close()
-            logger.info(f"Published InspeccionCreadaEvent for {event.id_inspeccion} correctly to RabbitMQ")
+            logger.info(f"Published {event_type} event correctly to RabbitMQ")
         except Exception as e:
             logger.error(f"Failed to publish event to RabbitMQ: {e}")
             raise e
