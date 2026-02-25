@@ -23,7 +23,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
                 numero_acometida=ac.numero_acometida,
                 material=ac.material,
                 diametro_mm=ac.diametro_mm,
-                profundidad_m=ac.profundidad_m
+                profundidad_m=float(ac.profundidad_m) if ac.profundidad_m else None
             ) for ac in model.acometidas
         ]
 
@@ -35,8 +35,8 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
             fecha_inspec=model.fecha_inspec,
             calle_zona=model.calle_zona,
             situacion=model.situacion,
-            cota_tapa=model.cota_tapa,
-            profundidad_m=model.profundidad_m,
+            cota_tapa=float(model.cota_tapa) if model.cota_tapa else None,
+            profundidad_m=float(model.profundidad_m) if model.profundidad_m else None,
             estado=model.estado,
             material_pozo=model.material_pozo,
             tipo_acceso=model.tipo_acceso,
@@ -182,7 +182,6 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
         model.observaciones = inspeccion.observaciones
 
         # Actualizar relaciones Acometidas
-        # Eliminar las existentes y mapear las nuevas (Estrategia sencilla para un agregado)
         for ac in model.acometidas:
             self.session.delete(ac)
             

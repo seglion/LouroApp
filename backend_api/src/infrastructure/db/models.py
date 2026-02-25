@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Integer, ForeignKey, Date, Numeric, Text, Enum
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Date, Numeric, Text, Enum, JSON
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
@@ -27,8 +27,8 @@ class PozoSaneamientoModel(Base):
     tecnico_id = Column(UUID(as_uuid=True), ForeignKey("tecnicos.id", ondelete="SET NULL"), nullable=True)
     fecha_inspec = Column(Date, nullable=True)
     calle_zona = Column(String(255))
-    situacion = Column(String(100))
-    cota_tapa = Column(Numeric(8, 3))
+    situacion = Column(String(255))
+    cota_tapa = Column(Numeric(6, 2))
     profundidad_m = Column(Numeric(6, 2))
     estado = Column(String(50))
     material_pozo = Column(String(50))
@@ -56,10 +56,10 @@ class PozoSaneamientoModel(Base):
     colector_diametro_entrada_mm = Column(Integer)
     colector_mat_salida = Column(String(50))
     colector_diametro_salida_mm = Column(Integer)
-    ruta_foto_situacion = Column(Text)
-    ruta_foto_interior = Column(String(500))
-    observaciones = Column(Text)
+    ruta_foto_situacion = Column(String(255))
+    ruta_foto_interior = Column(String(255))
     foto_keys = Column(ARRAY(String), default=list)
+    observaciones = Column(Text)
 
     acometidas = relationship("AcometidaSaneamientoModel", back_populates="pozo", cascade="all, delete-orphan")
     tecnico = relationship("UserModel", back_populates="inspecciones")

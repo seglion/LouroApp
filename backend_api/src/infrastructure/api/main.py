@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from src.infrastructure.db.database import Base, engine, get_db
 from src.infrastructure.db.sqlalchemy_repository import SqlAlchemyInspeccionRepository
 from src.infrastructure.db.user_repository import SqlAlchemyUserRepository
@@ -157,6 +158,7 @@ def health_check(db: Session = Depends(get_db)):
 @app.post("/inspecciones", status_code=status.HTTP_201_CREATED)
 def create_inspeccion(
     request: InspeccionRequest,
+    db: Session = Depends(get_db),
     use_case: RegisterInspeccionUseCase = Depends(get_register_inspeccion_use_case),
     current_user: User = Depends(get_current_user)
 ):
@@ -213,8 +215,17 @@ def create_inspeccion(
         acometidas=acometidas_entities
     )
 
-    use_case.execute(inspeccion)
-    return {"status": "created", "id": str(inspeccion.id)}
+    try:
+        use_case.execute(inspeccion)
+        return JSONResponse(status_code=201, content={"status": "created", "id": str(inspeccion.id)})
+    except IntegrityError:
+        # UniqueViolation: la inspección ya existe (reintento de sync after partial failure)
+        # Limpiar la transacción rota y devolver éxito idempotente
+        db.rollback()
+        return JSONResponse(
+            status_code=200,
+            content={"status": "already_exists", "id": str(inspeccion.id)}
+        )
 
 from uuid import UUID
 from fastapi import HTTPException

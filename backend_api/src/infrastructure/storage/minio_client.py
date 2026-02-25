@@ -7,18 +7,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MinioStorageClient:
-    def __init__(self, endpoint: str = "gis_saneamiento_minio:9000", bucket_name: str = "inspecciones"):
-        self.endpoint = endpoint
+    def __init__(self):
+        endpoint = os.getenv("MINIO_ENDPOINT", "gis_saneamiento_minio:9000")
         self.access_key = os.getenv("MINIO_ROOT_USER", "admin_minio")
         self.secret_key = os.getenv("MINIO_ROOT_PASSWORD", "minio_dev_pass")
-        self.bucket_name = bucket_name
-        
-        # En docker-compose usaremos secure=False porque no hay SSL para la red interna
+        self.bucket_name = os.getenv("MINIO_BUCKET", "inspecciones")
+        self.endpoint = endpoint
+
         self.client = Minio(
-            self.endpoint,
+            endpoint,
             access_key=self.access_key,
             secret_key=self.secret_key,
-            secure=False
+            secure=False,
         )
         self._ensure_bucket()
 

@@ -8,11 +8,18 @@ class CoordenadasUTMBase(BaseModel):
     y: float = Field(..., description="Norte (Northing) en metros")
 
 class AcometidaData(BaseModel):
-    id: UUID
-    numero_acometida: int
+    id: str
+    numero_acometida: Optional[int] = None
     material: Optional[str] = Field(None, max_length=50)
     diametro_mm: Optional[int] = None
     profundidad_m: Optional[float] = None
+
+class RedEstructuralData(BaseModel):
+    pos: str
+    tipo: str
+    material: str
+    diametro_mm: int
+    direccion_flujo: str
 
 class InspeccionRequest(BaseModel):
     id: UUID

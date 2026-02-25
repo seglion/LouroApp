@@ -20,9 +20,12 @@ class UploadInspeccionFotoUseCase:
         if not can_edit_inspeccion(current_user, inspeccion):
             raise ForbiddenError("No tienes permisos para añadir fotos a esta inspección.")
 
-        # 3. Generar un nombre único para evitar colisiones en el bucket
+        # 3. Construir la ruta preservando el sufijo del nombre enviado por el cliente
+        # file_name típico: "{uuid}_situacion.jpg" o "{uuid}_pozo.jpg"
+        # Resultado: "{id_pozo}/{uuid}_situacion.jpg"
         extension = file_name.split('.')[-1] if '.' in file_name else 'jpg'
-        unique_file_name = f"{inspeccion.id_pozo}/{uuid.uuid4()}.{extension}"
+        stem = file_name.rsplit('.', 1)[0] if '.' in file_name else file_name
+        unique_file_name = f"{inspeccion.id_pozo}/{stem}.{extension}"
 
         # 4. Subir la imagen a MinIO
         file_key = self.storage.upload_file(

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paso 1: Ubicación y General</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#373943",
+                        "background-light": "#f7f7f7",
+                        "background-dark": "#18181a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col max-w-[480px] mx-auto bg-white dark:bg-background-dark shadow-sm">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+<div class="flex items-center p-4 justify-between">
+<button class="text-primary dark:text-slate-100 flex size-10 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="text-primary dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Paso 1: Ubicación</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="text-primary/60 dark:text-slate-400 text-sm font-bold">Cancelar</button>
+</div>
+</div>
+<!-- Stepper Progress Indicators -->
+<div class="flex w-full flex-row items-center justify-center gap-2 pb-4">
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-32">
+<div class="px-4 py-6">
+<h3 class="text-primary dark:text-slate-100 text-2xl font-extrabold mb-1">Información General</h3>
+<p class="text-primary/60 dark:text-slate-400 text-sm mb-6">Complete los datos básicos de identificación de la infraestructura.</p>
+<div class="space-y-5">
+<!-- Field: ID Pozo -->
+<div class="flex flex-col gap-2">
+<label class="text-primary dark:text-slate-200 text-sm font-bold uppercase tracking-wider">ID Pozo</label>
+<div class="relative">
+<input class="w-full h-14 px-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-lg font-medium" placeholder="PZ-2024-001" type="text"/>
+</div>
+</div>
+<!-- Field: Calle/Zona -->
+<div class="flex flex-col gap-2">
+<label class="text-primary dark:text-slate-200 text-sm font-bold uppercase tracking-wider">Calle / Zona</label>
+<div class="relative">
+<input class="w-full h-14 px-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-lg font-medium" placeholder="Ej. Av. Industrial Sector Norte" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Field: Situación -->
+<div class="flex flex-col gap-2">
+<label class="text-primary dark:text-slate-200 text-sm font-bold uppercase tracking-wider">Situación</label>
+<select class="w-full h-14 px-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-lg font-medium appearance-none">
+<option>Operativo</option>
+<option>En Mantenimiento</option>
+<option>Fuera de Servicio</option>
+</select>
+</div>
+<!-- Field: Fecha -->
+<div class="flex flex-col gap-2">
+<label class="text-primary dark:text-slate-200 text-sm font-bold uppercase tracking-wider">Fecha</label>
+<input class="w-full h-14 px-4 rounded-lg border border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent text-base font-medium" type="date" value="2024-05-24"/>
+</div>
+</div>
+<!-- Location Capture Section -->
+<div class="mt-8 p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
+<div class="flex flex-col items-center text-center gap-4 py-4">
+<div class="size-16 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-3xl">location_on</span>
+</div>
+<div>
+<h4 class="text-primary font-bold text-lg">Geolocalización</h4>
+<p class="text-primary/70 text-sm">Capture las coordenadas exactas del sitio mediante GPS de alta precisión.</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-lg font-bold text-lg active:scale-95 transition-transform shadow-lg">
+<span class="material-symbols-outlined">my_location</span>
+                                Capturar Coordenadas UTM
+                            </button>
+</div>
+</div>
+<!-- Placeholder Map Area -->
+<div class="relative h-48 w-full rounded-xl overflow-hidden mt-4 border border-primary/10">
+<img alt="Mapa de ubicación" class="w-full h-full object-cover grayscale opacity-80" data-alt="Industrial site location satellite map view" data-location="San Francisco Industrial Park" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1hO3kuRu7GMzbhiC6p-OAjTKBRTyEJBg2q3XOqfCDhqDKd1Y3HT4Ode_SHUQ6WiOuiX3N1MfjjV5-R3Grd64W7vkEHPZ2J62vAk_aL-jPwkFsgEUAbiyP6RAgy6AdXRs17zZjIz5XS4hR4KO6qZcZnyIQCrRqywqe35r5TTVcKUPL0wPhwbhiCkrkF-VMu_YLSO2tNDZdUljRwBWrbCOUD8W2wxPRWmECyKnHDMv9PqvNdtQYhcDpt4dG3sBAbw10AiS0UCxIXQSk"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary p-2 rounded-full shadow-xl">
+<span class="material-symbols-outlined text-white text-3xl">place</span>
+</div>
+</div>
+<div class="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded text-[10px] font-bold text-primary uppercase">
+                            Satélite v4.2
+                        </div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<footer class="fixed bottom-0 w-full max-w-[480px] bg-white dark:bg-background-dark border-t border-primary/10 p-4">
+<div class="flex gap-4">
+<button class="flex-1 bg-primary text-white py-5 rounded-xl font-bold text-xl flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:opacity-90">
+                    Siguiente
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</footer>
+</div>
+</body></html>

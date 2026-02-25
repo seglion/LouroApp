@@ -1,9 +1,0 @@
-feat(api): Add RabbitMQ events and MinIO storage integration
-
-Implement an event publisher using RabbitMQ to emit InspeccionCreadaEvent
-when a new inspection is created. Add MinIO storage client and
-UploadInspeccionFotoUseCase to support photo uploads. Update PostgreSQL
-schema and SQLAlchemy models to store foto_keys as an array.
-
-Fixes Hito-2.3
-Co-Authored-By: Claude <noreply@anthropic.com>

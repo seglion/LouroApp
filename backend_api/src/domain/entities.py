@@ -11,11 +11,18 @@ class CoordenadasUTM:
 
 @dataclass
 class Acometida:
-    id: uuid.UUID
+    id: str
+    prof_m: Optional[float] = None
     material: Optional[str] = None
-    diametro_mm: Optional[int] = None
-    numero_acometida: Optional[int] = None
-    profundidad_m: Optional[float] = None
+    pos_reloj: Optional[str] = None
+
+@dataclass
+class RedEstructural:
+    pos: str
+    tipo: str
+    material: str
+    diametro_mm: int
+    direccion_flujo: str
 
 @dataclass
 class Inspeccion:

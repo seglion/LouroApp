@@ -1,61 +1,32 @@
-# Plan de Tareas: Fase 2 - Caso de Uso "Registrar Inspección"
+# Plan de Proyecto: Reinicialización de la Fase 3 (Frontend PWA y Ecosistema Offline-First)
 
-- [x] Definir `src/domain/entities.py` y `src/domain/repository_interface.py`.
-- [x] Implementar `src/application/register_inspeccion.py` (Caso de Uso).
-- [x] Crear `src/infrastructure/db/models.py` (SQLAlchemy).
-- [x] Crear `src/infrastructure/db/sqlalchemy_repository.py`.
-- [x] Crear los schemas de `pydantic` en `src/infrastructure/api/schemas.py`.
-- [x] Escribir prueba TDD (RED): `tests/test_register_inspeccion.py`.
-- [x] Implementar endpoint POST en `src/infrastructure/api/main.py`.
+## Hito 1: Analítica y Preparación del Sistema de Diseño (Stitch)
+- [x] Extraer y analizar en profundidad los HTML/CSS generados por el proyecto de Stitch (ID: 12549145011791967376) para aplicar las guías visuales.
+- [x] Consolidar los tokens de diseño (Colores Utilitarios, Tipografía legible, Layouts orientados a Tablets) en la base del proyecto Vue.js, siguiendo las normativas de `frontend-design` y `ui-ux-pro-max`.
+- [x] Reinicializar el proyecto Vue a estado inicial de Instalacion.
+- [x] Implementar / Refactorizar la vista **Field Inspector Login**.
+- [x] Implementar / Refactorizar la vista **Inspector Dashboard**, adaptándola exactamente a la funcionalidad requerida por Stitch (Nuevas inspecciones, sincronización y edición offline).
 
-## Fase 3: Dominio de Identidad y Usuarios
-- [x] Minitarea 1: Crear `src/domain/user_entities.py` (entidad `User`/`Tecnico` y Enum `Role`).
-- [x] Minitarea 2: Crear la interfaz `src/domain/user_repository_interface.py` (`save`, `get_by_email`, `get_by_id`).
-- [x] Minitarea 3: Modificar `src/infrastructure/db/models.py` añadiendo `UserModel`.
-- [x] Minitarea 4: Implementar `SqlAlchemyUserRepository` (en `src/infrastructure/db/repositories.py` o módulo equivalente).
-- [x] Minitarea 5: Fase TDD RED: Crear `tests/test_user_repository.py` simulando la persistencia y recuperación.
-- [x] Minitarea 6: Refactor de `Inspeccion` para enlazar `tecnico_id` a la entidad `User`.
+## Hito 2: Construcción del Sistema Multi-Paso (Formulario Dinámico)
+- [x] Establecer un orquestador para el formulario multi-paso que preserve el estado en local (Pinia / sincronizado con rutas) entre las distintas páginas del asistentente.
+- [x] **Paso 1:** Implementar vista "Ubicación y General".
+- [x] **Paso 2:** Implementar vista "Detalles del Pozo".
+- [x] **Paso 3:** Implementar vista "Detalles de la Tapa".
+- [x] **Paso 4:** Implementar vista "Estado y Entorno".
+- [x] **Paso 5:** Implementar vista "Red y Colector".
+- [x] **Paso 6:** Implementar vista "Acometidas domiciliarias" (Soporte para listas dinámicas).
 
-## Fase 4: Autenticación JWT y Seguridad
-- [x] Minitarea 1: Añadir `passlib[bcrypt]` y `python-jose[cryptography]` a `requirements.txt`.
-- [x] Minitarea 2: Crear servicio `src/infrastructure/security/hashing.py`.
-- [x] Minitarea 3: Crear Caso de Uso `src/application/login_user.py` para verificar hash y generar JWT.
-- [x] Minitarea 4: Implementar dependencias API `src/infrastructure/api/dependencies.py` (`get_current_user`).
-- [x] Minitarea 5: Testing (TDD RED): `tests/test_auth_flow.py`.
-- [x] Minitarea 6: Refactor de `POST /inspecciones` y schema para obtener el `tecnico_id` del JWT.
-## Fase 5: Actualización de Perfil (Update User)
-- [x] Minitarea 1: Añadir `update(user: User)` a `src/domain/user_repository_interface.py`.
-- [x] Minitarea 2: Crear el schema `UserUpdate` en `src/infrastructure/api/schemas.py`.
-- [x] Minitarea 3: Implementar update() en `src/infrastructure/db/user_repository.py`.
-- [x] Minitarea 4: Crear Caso de Uso `src/application/update_user.py` con re-hashing condicional.
-- [x] Minitarea 5: Fase TDD RED: Crear `tests/test_user_update.py` con tests de name change y auth invalidation.
-- [x] Minitarea 6: Añadir Endpoint PATCH `/users/me` en `main.py` protegido por `get_current_user`.
+## Hito 3: Integración de Dispositivo y Persistencia Local
+- [x] Integrar la **Geolocalización GPS** en el Paso 1, permitiendo adquirir las coordenadas del dispositivo en formato UTM ETRS89 Huso 29N dinámicamente.
+- [x] Integrar captura interactiva **Fotográfica** de alta resolución (Situación / Interior) con previsualización en el Paso 4.
+- [x] Definición robusta de datos en **IndexedDB** cumpliendo la jerarquía de `docs_arquitectura/openapi.yaml` (UUIDv7 offline, tabla Pozo, Acometidas y Metadatos de fotos).
+- [x] Persistencia reactiva (auto-save) y recuperación de sesión tras recarga.
 
-## Fase 6: Políticas de Autorización
-- [x] Minitarea 1: Crear `src/domain/policies.py` con `ForbiddenError` y reglas puras (RBAC/ABAC).
-- [x] Minitarea 2: Refactorizar `UpdateInspeccionUseCase` y `UpdateUserUseCase` con checks de políticas.
-- [x] Minitarea 3: Crear `CreateUserUseCase` protegido para ADMINs.
-- [x] Minitarea 4: Añadir `exception_handler` para `ForbiddenError` en `src/infrastructure/api/main.py` -> HTTP 403.
-- [x] Minitarea 5: Fase TDD RED: Crear `tests/test_authorization.py` con 4 tests granulares de seguridad.
 
-## Fase 7: Mensajería Asíncrona (RabbitMQ)
-- [x] Minitarea 1: Crear `src/domain/events.py` con el DTO `InspeccionCreadaEvent`.
-- [x] Minitarea 2: Crear abstracción `src/domain/event_publisher_interface.py` con `publish()`.
-- [x] Minitarea 3: Modificar `RegisterInspeccionUseCase` para publicar el evento y testearlo (TDD Green) aislando failures.
-- [x] Minitarea 4: Añadir `pika` a requirements e implementar `src/infrastructure/events/rabbitmq_publisher.py`.
-- [x] Minitarea 5: Inyectar publicador en `main.py` para el endpoint POST `/inspecciones`.
+## Hito 4: Sincronización y Cierre
+- [ ] Desarrollo y verificación del motor **Sync Engine** background para encolar datos (JSON transaccional a la API FastAPI + MinIO Presigned URLs para imágenes).
+- [ ] Pruebas unitarias y de simulación de conectividad "Offline/Online".
+- [ ] Revisión de Calidad (Aplicación de `frontend-dev-guidelines` y `clean-code`).
 
-## Fase 8: Almacenamiento de Fotos (MinIO)
-- [x] Minitarea 1: Validar políticas IAM (Sanity Check de Autorización).
-- [x] Minitarea 2: Crear `src/infrastructure/storage/minio_client.py` con subida y presigned URLs. Añadir dependencias (`minio`, `python-multipart`).
-- [x] Minitarea 3: Actualizar entidad `Inspeccion` y base de datos con campos para listado de fotos si aplica.
-- [x] Minitarea 4: Crear caso de uso `UploadInspeccionFoto`.
-- [x] Minitarea 5: Añadir endpoint POST `/inspecciones/{id}/photos` a la API.
-- [x] Minitarea 6: TDD: Añadir `tests/test_storage.py` con mocks de MinIO para asegurar que se enlaza a Inspección.
-
-## Revisión Final (MinIO Hito 2.3)
-- Se ha actualizado la base de datos `01_init_schema.sql` y las entidades para soportar la columna `foto_keys TEXT[]`.
-- Se ha implementado el adaptador de infraestructura `minio_client.py` con `upload_file`.
-- Se ha creado el caso de uso `UploadInspeccionFotoUseCase` que respeta la autorización (policy `can_edit_inspeccion`).
-- Se ha implementado un nuevo endpoint robusto en FastAPI `POST /inspecciones/{id}/photos`.
-- Los tests globales de la API han superado la validación en verde, previniendo fallos de Foreign Keys mediante Test Idempotency (Mocks Minio).
+## Revisión Final
+- [ ] (A rellenar cuando las tareas estén completadas)
