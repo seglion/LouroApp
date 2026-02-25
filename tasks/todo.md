@@ -12,9 +12,9 @@
 - [x] Implementar control de **Idempotencia**: Base de datos SQLite local para registrar `event_id` y evitar procesamiento duplicado ante reentregas.
 
 ## Hito 3: Descarga Asíncrona e Integración MinIO
-- [ ] Validar y extraer el payload del evento `inspeccion.creada`.
-- [ ] Implementar cliente `boto3` apuntando a MinIO, implementando retries y descargas resilientes.
-- [ ] Guardar las imágenes descargadas en el File System local (estructura: `Descargas_GIS/{Anio}/{Mes}/{Id_Pozo}/`).
+- [x] Validar y extraer el payload del evento `inspeccion.creada`.
+- [x] Implementar cliente `boto3` apuntando a MinIO, implementando retries y descargas resilientes.
+- [x] Guardar las imágenes descargadas en el File System local (estructura: `Descargas_GIS/{Anio}/{Mes}/{Id_Pozo}/`).
 
 ## Hito 4: Generación y Actualización de Capas GIS (GeoPackage)
 - [ ] Aplanar y formatear atributos extraídos del JSON (vinculando las rutas locales de las fotos).
