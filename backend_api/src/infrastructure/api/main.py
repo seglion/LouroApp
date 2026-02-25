@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, status, HTTPException, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import time
 import logging
@@ -62,6 +63,18 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="LouroApp API", version="1.0.0", lifespan=lifespan)
+
+# Configuración de CORS para producción
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://louro.aquaticaingenieria.com",
+        "http://localhost:5173",  # Para desarrollo local
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(ForbiddenError)
 async def forbidden_exception_handler(request: Request, exc: ForbiddenError):
