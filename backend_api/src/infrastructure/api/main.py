@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Depends, status, HTTPException, Request, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from contextlib import asynccontextmanager
+import time
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -29,9 +32,36 @@ class UserCreate(BaseModel):
 
 
 # ... Create tables (just in case) ...
-Base.metadata.create_all(bind=engine)
+# Se movió a lifespan para soportar reintentos en producción
+logger = logging.getLogger("uvicorn.error")
 
-app = FastAPI(title="LouroApp API", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    max_retries = 20
+    retry_interval = 3
+    connected = False
+    
+    for i in range(max_retries):
+        try:
+            # Intentar verificar conexión
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            connected = True
+            logger.info("✅ Conexión a la base de datos establecida correctamente.")
+            break
+        except Exception as e:
+            logger.warning(f"⚠️ Esperando a la base de datos... ({i+1}/{max_retries}): {e}")
+            time.sleep(retry_interval)
+    
+    if not connected:
+        logger.error("❌ No se pudo conectar a la base de datos tras múltiples reintentos.")
+        raise RuntimeError("Database connection failed")
+
+    # Crear tablas
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="LouroApp API", version="1.0.0", lifespan=lifespan)
 
 @app.exception_handler(ForbiddenError)
 async def forbidden_exception_handler(request: Request, exc: ForbiddenError):
