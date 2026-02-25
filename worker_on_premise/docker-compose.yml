@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gis-worker-on-premise:latest
+    container_name: gis-worker
+    restart: on-failure
+    environment:
+      # Las credenciales y endpoints se inyectan en tiempo de ejecución
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - APP_DATA_DIR=/app/data
+    volumes:
+      - worker_data:/app/data
+    networks:
+      - gis_dev_net
+
+    # Security Hardening (Recomendado por docker-expert)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    # Resource Limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+volumes:
+  worker_data:
+    driver: local
+
+networks:
+  gis_dev_net:
+    external: true

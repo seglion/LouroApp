@@ -1,0 +1,26 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowMinioGISWorkerDownload",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::gis-captures/pozos/*"
+        },
+        {
+            "Sid": "AllowMinioGISWorkerList",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::gis-captures",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": "pozos/*"
+                }
+            }
+        }
+    ]
+}
