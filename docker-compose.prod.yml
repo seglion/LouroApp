@@ -44,7 +44,15 @@ services:
       - LETSENCRYPT_HOST=louro-api.aquaticaingenieria.com
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-gis_saneamiento}
       - MINIO_ENDPOINT=minio:9000
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin_minio}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET=${MINIO_BUCKET:-gis-captures}
+      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER:-admin_rabbit}
+      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
     depends_on:
       - db
     networks:
@@ -68,6 +76,10 @@ services:
   db:
     image: postgis/postgis:15-3.3
     container_name: louro_db_prod
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-gis_saneamiento}
     volumes:
       - postgis_prod_data:/var/lib/postgresql/data
     networks:
@@ -82,6 +94,8 @@ services:
       - VIRTUAL_HOST=minio.aquaticaingenieria.com
       - VIRTUAL_PORT=9001
       - LETSENCRYPT_HOST=minio.aquaticaingenieria.com
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin_minio}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_prod_data:/data
     networks:
@@ -91,6 +105,9 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: louro_rabbit_prod
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-admin_rabbit}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     networks:
       - production_net
     restart: unless-stopped
