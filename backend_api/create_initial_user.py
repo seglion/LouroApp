@@ -19,8 +19,7 @@ def seed():
                 hashed_password=get_password_hash("password123"),
                 role=Role.ADMIN
             )
-            db.add(new_user)
-            db.commit()
+            repo.save(new_user)
             print("Usuario creado con éxito: admin@example.com / password123")
         else:
             print("El usuario admin@example.com ya existe.")

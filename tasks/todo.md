@@ -17,13 +17,13 @@
 - [x] Guardar las imágenes descargadas en el File System local (estructura: `Descargas_GIS/{Anio}/{Mes}/{Id_Pozo}/`).
 
 ## Hito 4: Generación y Actualización de Capas GIS (GeoPackage)
-- [ ] Aplanar y formatear atributos extraídos del JSON (vinculando las rutas locales de las fotos).
-- [ ] Usar `Fiona` / `GeoPandas` para abrir y/o crear un archivo `GeoPackage` (frente a Shapefile para mejor soporte de tipos).
-- [ ] Insertar/Upsert de la métrica espacial (`Point` en EPSG:25829) y atributos, asegurando transaccionalidad local.
+- [x] Aplanar y formatear atributos extraídos del JSON (vinculando las rutas locales de las fotos).
+- [x] Usar `Fiona` / `GeoPandas` para abrir y/o crear un archivo `GeoPackage` (frente a Shapefile para mejor soporte de tipos).
+- [x] Insertar/Upsert de la métrica espacial (`Point` en EPSG:25829) y atributos, asegurando transaccionalidad local.
 
 ## Revisión Final y Documentación
-- [ ] Levantar entorno de pruebas local (Rabbit + MinIO dockerizados) para E2E simulado.
-- [ ] Verificación de seguridad y linting del worker (`flake8`, `bandit`).
+- [x] Levantar entorno de pruebas local (Rabbit + MinIO dockerizados) para E2E simulado.
+- [x] Verificación de seguridad y linting del worker (`flake8`, `bandit`).
 
 ---
 <details>

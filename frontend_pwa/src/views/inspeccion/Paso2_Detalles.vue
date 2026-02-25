@@ -199,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { watch } from 'vue';
 import { useInspeccionStore } from '@/store/inspeccion';
 
 const inspeccionStore = useInspeccionStore();

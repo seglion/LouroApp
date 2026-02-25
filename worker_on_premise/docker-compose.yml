@@ -8,15 +8,18 @@ services:
     image: gis-worker-on-premise:latest
     container_name: gis-worker
     restart: on-failure
+    user: root
+    env_file:
+      - ../.env
     environment:
       # Las credenciales y endpoints se inyectan en tiempo de ejecución
       - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASS=${RABBITMQ_PASS}
+      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER:-guest}
+      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS:-guest}
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - APP_DATA_DIR=/app/data
     volumes:
       - worker_data:/app/data
@@ -46,3 +49,4 @@ volumes:
 networks:
   gis_dev_net:
     external: true
+    name: louroapp_gis_dev_net

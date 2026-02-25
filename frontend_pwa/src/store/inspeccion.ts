@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { toRaw } from 'vue';
 import { v7 as uuidv7 } from 'uuid';
 import { db, type InspeccionLocal } from '@/db/db';
 
@@ -99,8 +100,8 @@ export const useInspeccionStore = defineStore('inspeccion', {
             if (!this.inspeccionActual.id) return;
 
             try {
-                // Clonar el objeto para eliminar reactividad/proxies de Vue
-                const plainData = JSON.parse(JSON.stringify(this.inspeccionActual));
+                // Clonar el objeto de forma nativa eliminando proxies de Vue
+                const plainData = structuredClone(toRaw(this.inspeccionActual));
 
                 const data: InspeccionLocal = {
                     ...plainData,

@@ -5,10 +5,14 @@ import time
 import json
 import logging
 import sqlite3
+import fiona
 from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
+
+import geopandas as gpd
+from shapely.geometry import Point, mapping
 
 # Configuración básica de observabilidad (Logs)
 logging.basicConfig(
@@ -43,7 +47,9 @@ ROUTING_KEY = 'inspeccion.*'
 DB_PATH = os.path.join(APP_DATA_DIR, 'idempotency.db')
 
 def init_db():
-    """Crea la tabla de eventos procesados si no existe."""
+    """
+    Inicializa la base de datos local SQLite para control de idempotencia.
+    """
     os.makedirs(APP_DATA_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -57,6 +63,7 @@ def init_db():
     conn.close()
     logger.info(f"Base de datos de idempotencia inicializada en: {DB_PATH}")
 
+
 def is_event_processed(event_id: str) -> bool:
     """Verifica si un evento ya fue procesado mediante clave primaria."""
     conn = sqlite3.connect(DB_PATH)
@@ -66,6 +73,7 @@ def is_event_processed(event_id: str) -> bool:
     conn.close()
     return result is not None
 
+
 def mark_event_processed(event_id: str):
     """Marca un evento como completado tras una ingesta GIS exitosa."""
     conn = sqlite3.connect(DB_PATH)
@@ -74,10 +82,11 @@ def mark_event_processed(event_id: str):
     conn.commit()
     conn.close()
 
+
 # ---------------------------------------------------------
 # Lógica de Consumo GIS
 # ---------------------------------------------------------
-def process_gis_message(ch, method, properties, body):
+def process_message(ch, method, properties, body):
     """
     Callback principal para manejar mensajes entrantes de RabbitMQ.
     Aseguramos ACK manual para evitar pérdida temporal de mensajes.
@@ -101,6 +110,7 @@ def process_gis_message(ch, method, properties, body):
             return
 
         # 2. PROCESO DE INTEGRACIÓN (Hitos 3 y 4 se engancharán aquí)
+        # 1. DESCARGA DE IMÁGENES (Hito 3)
         payload = message.get("payload", {})
         pozo = payload.get("pozo", {})
         id_pozo = pozo.get("id_pozo", "POZO_DESCONOCIDO")
@@ -156,6 +166,105 @@ def process_gis_message(ch, method, properties, body):
                     logger.info(f"🆗 Archivo {filename} ya existe localmente. Omitiendo.")
             else:
                 logger.warning(f"URI de imagen no reconocida: {uri}")
+
+        # --------------------------------------------------
+        # HITO 4: GENERACIÓN Y ACTUALIZACIÓN DE CAPAS (GeoPackage)
+        # --------------------------------------------------
+        gpkg_path = os.path.join(APP_DATA_DIR, "Inspecciones_Recientes.gpkg")
+        
+        # Mapeamos las variables requeridas.
+        coord = pozo.get("coordenadas_utm", {})
+        x_val = coord.get("x")
+        y_val = coord.get("y")
+        epsg = coord.get("epsg", 25829)
+
+        # Solo guardamos si tenemos geometría válida
+        if x_val is not None and y_val is not None:
+            geom = Point(x_val, y_val)
+            
+            # Carga EXHAUSTIVA de 39 atributos según Fase 0
+            # Evitamos NaTs/nullable types de pandas convirtiendo None a v nativo
+            def clean_val(key, default=None):
+                v = pozo.get(key)
+                return v if v is not None else default
+
+            row_data = {
+                "id": clean_val("id", ""),
+                "id_pozo": clean_val("id_pozo", "N/A"),
+                "fecha_inspec": clean_val("fecha_inspec", ""),
+                "calle_zona": clean_val("calle_zona", ""),
+                "situacion": clean_val("situacion", ""),
+                "cota_tapa": float(pozo.get("cota_tapa") or 0.0),
+                "profundidad_m": float(pozo.get("profundidad_m") or 0.0),
+                "estado": clean_val("estado", ""),
+                "material_pozo": clean_val("material_pozo", ""),
+                "tipo_acceso": clean_val("tipo_acceso", ""),
+                "num_pates": int(pozo.get("num_pates") or 0),
+                "forma_pozo": clean_val("forma_pozo", ""),
+                "diametro_pozo_mm": int(pozo.get("diametro_pozo_mm") or 0),
+                "largo_pozo_mm": int(pozo.get("largo_pozo_mm") or 0),
+                "ancho_pozo_mm": int(pozo.get("ancho_pozo_mm") or 0),
+                "resalto": clean_val("resalto", ""),
+                "filtraciones": clean_val("filtraciones", ""),
+                "pluviales": clean_val("pluviales", ""),
+                "biofilm": clean_val("biofilm", ""),
+                "tapa_forma": clean_val("tapa_forma", ""),
+                "tapa_tipo": clean_val("tapa_tipo", ""),
+                "tapa_material": clean_val("tapa_material", ""),
+                "tapa_diametro_mm": int(pozo.get("tapa_diametro_mm") or 0),
+                "tapa_largo_mm": int(pozo.get("tapa_largo_mm") or 0),
+                "tapa_ancho_mm": int(pozo.get("tapa_ancho_mm") or 0),
+                "red_tipo": clean_val("red_tipo", ""),
+                "red_viene_de_pozo": clean_val("red_viene_de_pozo", ""),
+                "red_va_a_pozo": clean_val("red_va_a_pozo", ""),
+                "red_carga": clean_val("red_carga", ""),
+                "colector_mat_entrada": clean_val("colector_mat_entrada", ""),
+                "colector_diametro_entrada_mm": int(pozo.get("colector_diametro_entrada_mm") or 0),
+                "colector_mat_salida": clean_val("colector_mat_salida", ""),
+                "colector_diametro_salida_mm": int(pozo.get("colector_diametro_salida_mm") or 0),
+                "ruta_foto_situacion": os.path.join(download_dir, pozo.get("ruta_foto_situacion", "").split("/")[-1]) if pozo.get("ruta_foto_situacion") else "",
+                "ruta_foto_interior": os.path.join(download_dir, pozo.get("ruta_foto_interior", "").split("/")[-1]) if pozo.get("ruta_foto_interior") else "",
+                "observaciones": clean_val("observaciones", ""),
+                "geometry": geom
+            }
+
+            acometidas = payload.get("acometidas", [])
+            row_data["num_acometidas"] = len(acometidas)
+            row_data["acometidas_json"] = json.dumps(acometidas) if acometidas else ""
+
+            # Sanitización y persistencia directa vía Fiona (evita dtypes complejos de pandas)
+            schema = {
+                "geometry": "Point",
+                "properties": {
+                    "id": "str", "id_pozo": "str", "fecha_inspec": "str", "calle_zona": "str",
+                    "situacion": "str", "cota_tapa": "float", "profundidad_m": "float",
+                    "estado": "str", "material_pozo": "str", "tipo_acceso": "str",
+                    "num_pates": "int", "forma_pozo": "str", "diametro_pozo_mm": "int",
+                    "largo_pozo_mm": "int", "ancho_pozo_mm": "int", "resalto": "str",
+                    "filtraciones": "str", "pluviales": "str", "biofilm": "str",
+                    "tapa_forma": "str", "tapa_tipo": "str", "tapa_material": "str",
+                    "tapa_diametro_mm": "int", "tapa_largo_mm": "int", "tapa_ancho_mm": "int",
+                    "red_tipo": "str", "red_viene_de_pozo": "str", "red_va_a_pozo": "str",
+                    "red_carga": "str", "colector_mat_entrada": "str", "colector_diametro_entrada_mm": "int",
+                    "colector_mat_salida": "str", "colector_diametro_salida_mm": "int",
+                    "ruta_foto_situacion": "str", "ruta_foto_interior": "str",
+                    "observaciones": "str", "num_acometidas": "int", "acometidas_json": "str"
+                }
+            }
+
+            mode = "a" if os.path.exists(gpkg_path) else "w"
+            logger.info(f"🗺️  {'Actualizando' if mode == 'a' else 'Creando'} registro GIS en {gpkg_path}")
+            
+            with fiona.open(gpkg_path, mode, driver="GPKG", schema=schema, crs=f"EPSG:{epsg}", layer="pozos_inspeccionados") as layer:
+                # Preparamos las propiedades filtrando la geometría y asegurando tipos nativos
+                props = {k: v for k, v in row_data.items() if k != "geometry"}
+                layer.write({
+                    "geometry": mapping(geom),
+                    "properties": props
+                })
+
+        else:
+            logger.warning("No se incluyeron coordenadas espaciales válidas. Omitiendo volcado a GIS.")
 
         # 3. ÉXITO: MARCAR PROCESADO Y NOTIFICAR AL BROKER (ACK)
         mark_event_processed(event_id)

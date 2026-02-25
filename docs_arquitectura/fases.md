@@ -56,6 +56,11 @@ Riesgo (Conflictos Offline y "Lost Updates"): Dos técnicos inspeccionando o mod
 Mitigación: Usar control de concurrencia optimista (Versionado / ETags) sumado a un modelo de tipo Event Sourcing ligero o "Append Only" para las inspecciones. En una inspección física el riesgo de pisarse es menor, pero las tablas deben aceptar deltas de información en vez de un "upsert" ciego.
 Riesgo: Sincronización bloqueada por una foto corrupta o hiper-pesada.
 Mitigación: Subir metadatos (JSON) primero, subir fotos después (vía Presigned URLs directos a MinIO). El backend junta el estado final usando eventos.
+
+
+
+
+
 Fase 4: Mensajería y Desarrollo del Worker On-Premise
 Conteo e integración del flujo desde la nube hasta la oficina técnica.
 
@@ -67,6 +72,15 @@ Hito 4.3: Generación/Actualización de capas (Shapefile/GeoPackage) usando Fion
 Riesgos Técnicos y Mitigación:
 Riesgo (Idempotencia en el Worker): Como aseguramos At-Least-Once delivery, el worker puede recibir el mismo evento dos veces.
 Mitigación: El Worker On-Premise debe ser diseñado para ser idempotente. Cada Worker debe mantener un registro local (ej. una pequeña DB SQLite local) de evento_id procesados. Si un archivo o registro ya existe para ese UUID, actualiza o simplemente hace ack e ignora.
+
+
+
+
+
+
+
+
+
 Fase 5: Pruebas End-to-End (E2E) y "Field Testing" (Pruebas de Campo)
 Validación en condiciones extremas y de mundo real.
 

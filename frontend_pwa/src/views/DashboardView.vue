@@ -274,8 +274,16 @@ const ejecutarSync = async () => {
     if (sincronizando.value) return;
     sincronizando.value = true;
     try {
-        await syncService.startSync();
+        const result = await syncService.startSync();
         await cargarDatos(); // Recargar tras sync
+        
+        if (result.total > 0) {
+            if (result.errors === 0) {
+                alert(`¡Éxito! Se han sincronizado ${result.synced} registro(s) correctamente.`);
+            } else {
+                alert(`Sincronización finalizada.\n\nÉxito: ${result.synced}\nErrores: ${result.errors}\n\nRevisa tu conexión o contacta a soporte si el problema persiste.`);
+            }
+        }
     } finally {
         sincronizando.value = false;
     }
