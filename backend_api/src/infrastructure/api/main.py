@@ -146,9 +146,12 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), use_case: LoginUserU
 from src.domain.event_publisher_interface import EventPublisher
 from src.infrastructure.events.rabbitmq_publisher import RabbitMQPublisher
 
+import os
+
 def get_event_publisher():
     # Devuelve la configuración de producción real a RabbitMQ
-    return RabbitMQPublisher(host="gis_saneamiento_rabbit", exchange="inspecciones.v1")
+    host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+    return RabbitMQPublisher(host=host, exchange="inspecciones.v1")
 
 def get_register_inspeccion_use_case(db: Session = Depends(get_db), publisher: EventPublisher = Depends(get_event_publisher)):
     repository = SqlAlchemyInspeccionRepository(db)
