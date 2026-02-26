@@ -50,8 +50,8 @@ services:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin_minio}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_BUCKET=${MINIO_BUCKET:-gis-captures}
-      - RABBITMQ_USER=${RABBITMQ_DEFAULT_USER:-admin_rabbit}
-      - RABBITMQ_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-admin_rabbit}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     depends_on:
       - db
     networks:
