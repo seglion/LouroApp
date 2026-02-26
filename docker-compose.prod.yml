@@ -97,6 +97,8 @@ services:
       - LETSENCRYPT_HOST=minio.aquaticaingenieria.com
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin_minio}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
     volumes:
       - minio_prod_data:/data
     networks:
