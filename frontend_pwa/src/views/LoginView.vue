@@ -4,10 +4,10 @@
     <!-- Header / Logo Area -->
     <div class="flex items-center bg-white dark:bg-background-dark p-6 pb-2 justify-center">
       <div class="flex flex-col items-center gap-2">
-        <div class="bg-primary text-white p-3 rounded-lg">
-          <span class="material-symbols-outlined text-3xl">precision_manufacturing</span>
+        <div class="h-20 w-auto overflow-hidden">
+          <img src="/pwa-512x512.png" alt="AQUATICA Logo" class="h-full w-full object-contain drop-shadow-sm" />
         </div>
-        <h2 class="text-primary dark:text-slate-100 text-sm font-bold tracking-widest uppercase mt-2">Infrastructure Management</h2>
+        <h2 class="text-primary dark:text-slate-100 text-sm font-bold tracking-widest uppercase mt-4">Aplicación de Campo</h2>
       </div>
     </div>
     
@@ -25,7 +25,7 @@
     
     <!-- Form Container -->
     <div class="px-6 py-8">
-      <h1 class="text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-bold leading-tight text-center pb-2">Field Inspector</h1>
+      <h1 class="text-slate-900 dark:text-slate-100 tracking-tight text-3xl font-bold leading-tight text-center pb-2">Agente de Campo</h1>
       <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal pb-8 text-center uppercase tracking-wider">Authentication Required</p>
       
       <form class="space-y-6" @submit.prevent="login">

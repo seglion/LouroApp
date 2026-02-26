@@ -10,8 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'GIS Saneamiento',
-        short_name: 'GIS',
+        name: 'REGISTRO SANEAMIENTO CONSORCIO LOURO',
+        short_name: 'LOURO GIS',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
