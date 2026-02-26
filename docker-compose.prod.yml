@@ -133,3 +133,4 @@ volumes:
   vhost:
   html:
   acme:
+  rabbitmq_data:
