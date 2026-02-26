@@ -12,8 +12,8 @@ export default defineConfig({
       manifest: {
         name: 'GIS Saneamiento',
         short_name: 'GIS',
-        theme_color: '#1E3A8A',
-        background_color: '#0F172A',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         display: 'standalone',
         icons: [
           { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
