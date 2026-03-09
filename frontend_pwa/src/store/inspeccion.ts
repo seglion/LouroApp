@@ -13,7 +13,7 @@ const getInitialState = () => ({
         situacion: '',
         cota_tapa: null as number | null,
         profundidad_m: null as number | null,
-        material_pozo: '',
+        material_pozo: 'Hormigón',
         tipo_acceso: '',
         num_pates: 0,
         forma_pozo: 'Circular',

@@ -139,7 +139,7 @@
             <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Sistema de Acceso</label>
             <div class="flex p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
               <button 
-                v-for="opt in ['Pates', 'Escalones', 'Grapas', 'Ninguno']" 
+                v-for="opt in ['Escalones', 'Grapas', 'Ninguno']" 
                 :key="opt"
                 @click="inspeccionStore.inspeccionActual.tipo_acceso = opt"
                 :class="inspeccionStore.inspeccionActual.tipo_acceso === opt 

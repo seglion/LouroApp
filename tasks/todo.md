@@ -1,13 +1,15 @@
-# Plan de Acción: Validación de Cota Obligatoria
+# Plan de Acción: Refinamiento Paso 2 (Acceso y Materiales)
 
 ## Análisis y Diseño
-- [x] Rastrear la validez del Paso 1 en la interfaz gráfica (botón Siguiente).
-- [x] Localizar el getter `pasoActualValido` en `src/store/inspeccion.ts`.
+- [x] Identificar la lista de opciones de "Sistema de Acceso" en `Paso2_Detalles.vue`.
+- [x] Localizar el estado inicial en `src/store/inspeccion.ts`.
 
 ## Implementación
-- [x] **Paso 1 (Store):** Modificar el `case 1:` del getter en `inspeccion.ts`.
-- [x] **Paso 1 (Store):** Añadir validación técnica tipo `i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa !== ''`.
+- [x] **Store:** Cambiar el valor inicial de `material_pozo` a 'Hormigón' en `getInitialState`.
+- [x] **Paso 2 (Detalles):** Eliminar la opción 'Pates' del array de botones de "Sistema de Acceso".
+- [x] **Paso 2 (Detalles):** Verificar que la lógica subordinada (cantidad de peldaños) siga funcionando correctamente para otras opciones.
 
 ## Revisión Final
-- [x] Comprobar que el botón Siguiente del footer queda inhabilitado si la cota Z está en blanco.
-- [x] Comprobar que se permite pasar si la cota Z es 0.
+- [x] Validar que una nueva inspección comience con "Hormigón" ya seleccionado.
+- [x] Comprobar que el botón "Pates" ya no aparece en la interfaz.
+- [x] Realizar commit con los cambios.
