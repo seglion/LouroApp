@@ -1,27 +1,19 @@
-# Plan de Acción: Herencia de datos del pozo anterior
+# Plan de Acción: Integración de Inventario Geoespacial (Radar de Pozos)
 
-## Análisis y Diseño
-- [ ] Investigar en `src/store/inspeccion.ts` cómo obtener la última inspección (sincronizada o pendiente) desde IndexedDB.
-- [ ] Definir los campos que deben "heredarse" o tener nuevos valores predeterminados.
+## Análisis y Diseño (Frontend Design)
+- **Concepto**: "Radar de Activos Cercanos". El operario ve automáticamente los pozos en un radio de 100m.
+- **A estética**: Industrial Utilitarian. Marcadores precisos, círculos de radio técnicos.
+- **Diferenciación**: Selección interactiva desde mapa para evitar errores de escritura en IDs.
 
-## Implementación
-- [x] **DB:** Añadir `finalizada` a los índices para optimizar búsquedas.
-- [x] **Store:** Modificar `iniciarNuevaInspeccion` para intentar cargar datos de la última inspección realizada (sincronizada o lista para sincronizar).
-- [x] **Paso 1 (Ubicación):**
-    - [x] Preseleccionar `situacion` del pozo anterior.
-- [x] **Paso 2 (Tapa):**
-    - [x] Preseleccionar `tapa_forma` del pozo anterior (Default: 'Circular').
-    - [x] Preseleccionar `tapa_diametro_mm` si es circular (Default: 600).
-    - [x] Preseleccionar `tapa_material` (Default: 'Fundición Dúctil').
-    - [x] Preseleccionar `tapa_tipo` (Default: 'Abatible').
-- [x] **Paso 3 (Pozo):**
-    - [x] Preseleccionar `forma_pozo`, `material_pozo` y dimensiones del pozo anterior.
-    - [x] Default `diametro_pozo_mm`: 1000.
-    - [x] Default `tipo_acceso`: 'Ninguno'.
-- [x] **Paso 5 (Red):**
-    - [x] Preseleccionar materiales y diámetros de los colectores del pozo anterior.
-    - [x] Default materiales: 'PVC'.
+## Tareas
+- [x] **Datos Mock**: Crear un set de datos de ejemplo (Pozos) cerca de las coordenadas de trabajo habituales.
+- [x] **Lógica Espacial**: Implementar filtro de proximidad (distancia Euclídea en UTM).
+- [x] **Componente Mapa (`Paso1_General.vue`)**:
+    - [x] Añadir capa de "Radar" (Círculo de 100m alrededor del GPS).
+    - [x] Añadir capa de "Pozos Cercanos" con iconos diferenciados.
+    - [x] Implementar evento `click` en los pozos para capturar el `id_pozo`.
+- [x] **Estilo**: Asegurar que los marcadores y el radar se integren con el diseño premium/industrial.
 
 ## Verificación
-- [ ] Crear una inspección, completarla, y verificar que la siguiente herede los valores indicados.
-- [ ] Verificar que si no hay inspección previa, se usen los nuevos valores por defecto (600mm, etc).
+- [ ] Simular captura de GPS y comprobar que aparecen puntos cercanos.
+- [ ] Hacer clic en un punto y verificar que el campo `ID del Activo` se rellena solo.

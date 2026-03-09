@@ -170,6 +170,17 @@ const inspeccionStore = useInspeccionStore();
 const isOnline = ref(navigator.onLine);
 let map: L.Map | null = null;
 let marker: L.Marker | null = null;
+let radarCircle: L.Circle | null = null;
+let nearbyWellsLayer: L.LayerGroup | null = null;
+
+// Mock de Inventario de Pozos (Datos de ejemplo)
+const pozosInventario = [
+  { id: 'P-5001', x: 547242.45, y: 4799842.12 },
+  { id: 'P-5002', x: 547192.45, y: 4799792.12 },
+  { id: 'P-5003', x: 547262.45, y: 4799762.12 },
+  { id: 'P-5004', x: 547152.45, y: 4799862.12 },
+  { id: 'P-9999', x: 548212.45, y: 4801812.12 }, // Lejos (fuera de radar)
+];
 
 const precisionGPS = ref<number | null>(null);
 
@@ -189,6 +200,8 @@ onMounted(() => {
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community',
     maxZoom: 19
   }).addTo(map);
+
+  nearbyWellsLayer = L.layerGroup().addTo(map);
 
   // Si ya hay coordenadas, poner el marcador
   actualizarMarcador();
@@ -287,17 +300,68 @@ const actualizarMarcador = () => {
       try {
         // Convertir UTM 29N a WGS84 (Lat/Lng) para Leaflet
         const [lng, lat] = proj4(UTM_29N, WGS84, [x, y]);
-        
         const coords: L.LatLngExpression = [lat, lng];
+        
+        // 1. Actualizar Marcador Usuario
         if (marker) map.removeLayer(marker);
-        marker = L.marker(coords).addTo(map);
-        // [MODIFICADO] Usar setView sin animación para respuesta industrial instantánea
+        marker = L.marker(coords, {
+          icon: L.divIcon({
+            className: 'custom-user-marker',
+            html: `<div class="radar-pulse"></div><div class="inner-dot"></div>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+          })
+        }).addTo(map);
+
+        // 2. Actualizar Radar (100m)
+        if (radarCircle) map.removeLayer(radarCircle);
+        radarCircle = L.circle(coords, {
+          radius: 100,
+          color: '#99CCFF',
+          fillColor: '#99CCFF',
+          fillOpacity: 0.1,
+          weight: 1,
+          dashArray: '5, 5',
+          interactive: false
+        }).addTo(map);
+
+        // 3. Filtrar y Dibujar Pozos cercanos
+        actualizarPozosCercanos(x, y);
+
         map.setView(coords, 19, { animate: false });
       } catch (err) {
         console.error("Error en la conversión de coordenadas:", err);
       }
     }
   }
+};
+
+const actualizarPozosCercanos = (userX: number, userY: number) => {
+  if (!nearbyWellsLayer || !map) return;
+  nearbyWellsLayer.clearLayers();
+
+  pozosInventario.forEach(pozo => {
+    const dist = Math.sqrt(Math.pow(pozo.x - userX, 2) + Math.pow(pozo.y - userY, 2));
+    
+    if (dist <= 100) {
+      const [lng, lat] = proj4(UTM_29N, WGS84, [pozo.x, pozo.y]);
+      const wellMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'well-marker-radar',
+          html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        })
+      });
+
+      wellMarker.on('click', () => {
+        inspeccionStore.inspeccionActual.id_pozo = pozo.id;
+        // Efecto haptico visual (glow temporal) puede ir aquí
+      });
+
+      wellMarker.addTo(nearbyWellsLayer!);
+    }
+  });
 };
 
 // Observar cambios en coordenadas para mover el marcador
@@ -325,5 +389,66 @@ input[type=number] {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos Radar y Marcadores */
+:deep(.custom-user-marker) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:deep(.inner-dot) {
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 2;
+}
+:deep(.radar-pulse) {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+:deep(.well-marker-radar) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+:deep(.well-dot) {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border: 2px solid #363842;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+:deep(.well-marker-radar:hover .well-dot) {
+  background: #99CCFF;
+  transform: scale(1.5);
+}
+:deep(.well-label) {
+  position: absolute;
+  top: 14px;
+  background: #363842;
+  color: white;
+  font-size: 8px;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.8;
 }
 </style>
