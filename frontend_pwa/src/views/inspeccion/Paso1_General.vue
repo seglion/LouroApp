@@ -42,21 +42,29 @@
               v-model="inspeccionStore.inspeccionActual.id_pozo"
               type="text" 
               placeholder="P-0000"
+              list="pozos-radar-list"
               class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
             />
+            
+            <!-- Datalist para autocompletado nativo -->
+            <datalist id="pozos-radar-list">
+              <option v-for="id in pozosDetectadosIds" :key="id" :value="id" />
+            </datalist>
           </div>
           
-          <!-- Sugerencias del Radar -->
-          <div v-if="pozosDetectadosIds.length > 0" class="flex flex-wrap gap-2 animate-in">
-            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest w-full">Sugerencias Radar (100m):</span>
-            <button 
-              v-for="id in pozosDetectadosIds" 
-              :key="id"
-              @click="inspeccionStore.inspeccionActual.id_pozo = id"
-              class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-black text-slate-600 dark:text-slate-400 hover:bg-accent-blue hover:text-white dark:hover:bg-accent-blue dark:hover:text-white transition-all shadow-sm active:scale-95"
-            >
-              {{ id }}
-            </button>
+          <!-- Sugerencias del Radar (Carrusel Lateral) -->
+          <div v-if="pozosDetectadosIds.length > 0" class="flex flex-col gap-2 animate-in overflow-hidden">
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (100m)</span>
+            <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 px-1 scrollbar-hide snap-x">
+              <button 
+                v-for="id in pozosDetectadosIds" 
+                :key="id"
+                @click="inspeccionStore.inspeccionActual.id_pozo = id"
+                class="flex-none px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-black text-slate-600 dark:text-slate-400 hover:bg-accent-blue hover:text-white dark:hover:bg-accent-blue dark:hover:text-white transition-all shadow-sm active:scale-95 snap-start min-w-[80px] text-center"
+              >
+                {{ id }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -473,5 +481,14 @@ input[type=number] {
   white-space: nowrap;
   pointer-events: none;
   opacity: 0.8;
+}
+
+/* Utilidades para el Carrusel */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
