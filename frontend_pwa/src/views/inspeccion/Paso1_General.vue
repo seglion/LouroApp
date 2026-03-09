@@ -183,6 +183,11 @@ onMounted(() => {
   // Si ya hay coordenadas, poner el marcador
   actualizarMarcador();
 
+  // [NUEVO] Si no hay coordenadas, forzamos la captura GPS inmediata al abrir
+  if (!coordenadasListas.value) {
+    capturarGPS();
+  }
+
   nextTick(() => {
     if (map) map.invalidateSize();
   });
@@ -276,7 +281,8 @@ const actualizarMarcador = () => {
         const coords: L.LatLngExpression = [lat, lng];
         if (marker) map.removeLayer(marker);
         marker = L.marker(coords).addTo(map);
-        map.flyTo(coords, 19);
+        // [MODIFICADO] Usar setView sin animación para respuesta industrial instantánea
+        map.setView(coords, 19, { animate: false });
       } catch (err) {
         console.error("Error en la conversión de coordenadas:", err);
       }
