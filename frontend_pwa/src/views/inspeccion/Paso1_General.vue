@@ -45,6 +45,19 @@
               class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
             />
           </div>
+          
+          <!-- Sugerencias del Radar -->
+          <div v-if="pozosDetectadosIds.length > 0" class="flex flex-wrap gap-2 animate-in">
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest w-full">Sugerencias Radar (100m):</span>
+            <button 
+              v-for="id in pozosDetectadosIds" 
+              :key="id"
+              @click="inspeccionStore.inspeccionActual.id_pozo = id"
+              class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-black text-slate-600 dark:text-slate-400 hover:bg-accent-blue hover:text-white dark:hover:bg-accent-blue dark:hover:text-white transition-all shadow-sm active:scale-95"
+            >
+              {{ id }}
+            </button>
+          </div>
         </div>
 
         <!-- Fecha de Inspección -->
@@ -182,6 +195,7 @@ const pozosInventario = [
   { id: 'P-OUT',  x: 524380.97, y: 4677363.63 }, // Fuera de radar
 ];
 
+const pozosDetectadosIds = ref<string[]>([]);
 const precisionGPS = ref<number | null>(null);
 
 const coordenadasListas = computed(() => {
@@ -343,11 +357,14 @@ const actualizarMarcador = () => {
 const actualizarPozosCercanos = (userX: number, userY: number) => {
   if (!nearbyWellsLayer || !map) return;
   nearbyWellsLayer.clearLayers();
+  
+  const detectados: string[] = [];
 
   pozosInventario.forEach(pozo => {
     const dist = Math.sqrt(Math.pow(pozo.x - userX, 2) + Math.pow(pozo.y - userY, 2));
     
     if (dist <= 100) {
+      detectados.push(pozo.id);
       const [lng, lat] = proj4(UTM_29N, WGS84, [pozo.x, pozo.y]);
       const wellMarker = L.marker([lat, lng], {
         icon: L.divIcon({
@@ -366,6 +383,8 @@ const actualizarPozosCercanos = (userX: number, userY: number) => {
       wellMarker.addTo(nearbyWellsLayer!);
     }
   });
+
+  pozosDetectadosIds.value = detectados;
 };
 
 // Observar cambios en coordenadas para mover el marcador
