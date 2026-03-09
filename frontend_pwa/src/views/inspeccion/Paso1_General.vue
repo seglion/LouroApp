@@ -173,13 +173,13 @@ let marker: L.Marker | null = null;
 let radarCircle: L.Circle | null = null;
 let nearbyWellsLayer: L.LayerGroup | null = null;
 
-// Mock de Inventario de Pozos (Datos de ejemplo)
+// Mock de Inventario de Pozos (Datos de ejemplo) centrado en 523380.97, 4676363.63
 const pozosInventario = [
-  { id: 'P-5001', x: 547242.45, y: 4799842.12 },
-  { id: 'P-5002', x: 547192.45, y: 4799792.12 },
-  { id: 'P-5003', x: 547262.45, y: 4799762.12 },
-  { id: 'P-5004', x: 547152.45, y: 4799862.12 },
-  { id: 'P-9999', x: 548212.45, y: 4801812.12 }, // Lejos (fuera de radar)
+  { id: 'P-8001', x: 523380.97 + 25, y: 4676363.63 + 30 },
+  { id: 'P-8002', x: 523380.97 - 40, y: 4676363.63 - 20 },
+  { id: 'P-8003', x: 523380.97 + 10, y: 4676363.63 - 55 },
+  { id: 'P-8004', x: 523380.97 - 65, y: 4676363.63 + 45 },
+  { id: 'P-OUT',  x: 524380.97, y: 4677363.63 }, // Fuera de radar
 ];
 
 const precisionGPS = ref<number | null>(null);
@@ -191,10 +191,13 @@ const coordenadasListas = computed(() => {
 
 // Inicializar el mapa
 onMounted(() => {
+  // Convertir centro UTM proporcionado a Lat/Lng para el mapa
+  const [lng, lat] = proj4(UTM_29N, WGS84, [523380.97, 4676363.63]);
+  
   map = L.map('map-step-1', {
     zoomControl: false,
     attributionControl: false
-  }).setView([43.3623, -8.4115], 18); // Default Coruña
+  }).setView([lat, lng], 18);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community',
@@ -281,13 +284,14 @@ const buscarDireccion = async (lat: number, lng: number) => {
 };
 
 const mockGPS = () => {
-    precisionGPS.value = 3.5;
-    inspeccionStore.inspeccionActual.coordenadas_utm = {
-    x: 547212.45,
-    y: 4799812.12
+  precisionGPS.value = 3.5;
+  inspeccionStore.inspeccionActual.coordenadas_utm = {
+    x: 523380.97,
+    y: 4676363.63
   };
   if (navigator.onLine) {
-    buscarDireccion(43.3623, -8.4115);
+    const [lng, lat] = proj4(UTM_29N, WGS84, [523380.97, 4676363.63]);
+    buscarDireccion(lat, lng);
   }
 };
 
