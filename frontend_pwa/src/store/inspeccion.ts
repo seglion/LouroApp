@@ -62,7 +62,8 @@ export const useInspeccionStore = defineStore('inspeccion', {
             const i = state.inspeccionActual;
             switch (i.estado_paso) {
                 case 1:
-                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y);
+                    const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
+                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
                 case 2:
                     const dimOk = i.forma_pozo === 'Circular'
                         ? (i.diametro_pozo_mm && i.diametro_pozo_mm > 0)
