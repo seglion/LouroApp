@@ -14,10 +14,10 @@ const getInitialState = () => ({
         cota_tapa: null as number | null,
         profundidad_m: null as number | null,
         material_pozo: 'Hormigón',
-        tipo_acceso: '',
+        tipo_acceso: 'Ninguno',
         num_pates: 0,
         forma_pozo: 'Circular',
-        diametro_pozo_mm: null as number | null,
+        diametro_pozo_mm: 1000 as number | null,
         largo_pozo_mm: null as number | null,
         ancho_pozo_mm: null as number | null,
         resalto: 'No',
@@ -30,7 +30,7 @@ const getInitialState = () => ({
         tapa_forma: 'Circular',
         tapa_tipo: 'Abatible',
         tapa_material: 'Fundición Dúctil',
-        tapa_diametro_mm: null as number | null,
+        tapa_diametro_mm: 600 as number | null,
         tapa_largo_mm: null as number | null,
         tapa_ancho_mm: null as number | null,
         red_tipo: 'Unitario',
@@ -87,9 +87,37 @@ export const useInspeccionStore = defineStore('inspeccion', {
     },
     actions: {
         async iniciarNuevaInspeccion() {
-            // Reset completo del estado
+            // Reset inicial
             const initialState = getInitialState();
             Object.assign(this.$state, initialState);
+
+            try {
+                // Buscar el último pozo finalizado o sincronizado para heredar datos
+                const ultimo = await db.inspecciones
+                    .orderBy('last_modified')
+                    .reverse()
+                    .filter(i => i.finalizada === true || i.sync_status === 'synced')
+                    .first();
+
+                if (ultimo) {
+                    console.log('Heredando datos del pozo anterior:', ultimo.id_pozo);
+                    this.inspeccionActual.situacion = ultimo.situacion || '';
+                    this.inspeccionActual.tapa_forma = ultimo.tapa_forma || 'Circular';
+                    this.inspeccionActual.tapa_diametro_mm = ultimo.tapa_diametro_mm || 600;
+                    this.inspeccionActual.tapa_material = ultimo.tapa_material || 'Fundición Dúctil';
+                    this.inspeccionActual.tapa_tipo = ultimo.tapa_tipo || 'Abatible';
+
+                    // Herencia Paso 3: Detalles del Pozo
+                    this.inspeccionActual.forma_pozo = ultimo.forma_pozo || 'Circular';
+                    this.inspeccionActual.material_pozo = ultimo.material_pozo || 'Hormigón';
+                    this.inspeccionActual.diametro_pozo_mm = ultimo.diametro_pozo_mm || 1000;
+                    this.inspeccionActual.largo_pozo_mm = ultimo.largo_pozo_mm || null;
+                    this.inspeccionActual.ancho_pozo_mm = ultimo.ancho_pozo_mm || null;
+                    this.inspeccionActual.tipo_acceso = ultimo.tipo_acceso || 'Ninguno';
+                }
+            } catch (error) {
+                console.warn('No se pudo recuperar datos de herencia, usando valores por defecto:', error);
+            }
 
             this.inspeccionActual.id = uuidv7();
             const datePart = new Date().toISOString().split('T')[0];
