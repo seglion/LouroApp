@@ -16,22 +16,27 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Forma del Pozo Select -->
-          <div class="flex flex-col gap-3">
-            <label for="forma_pozo" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Forma del Pozo</label>
-            <div class="relative group">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors z-10">hexagon</span>
-              <select 
-                id="forma_pozo" 
-                v-model="inspeccionStore.inspeccionActual.forma_pozo"
-                class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-10 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none appearance-none"
+          <!-- Forma del Pozo segmentado -->
+          <div class="flex flex-col gap-4">
+            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Forma del Pozo</label>
+            <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+              <button 
+                v-for="forma in [
+                  { id: 'Circular', label: 'Circular', icon: 'trip_origin' },
+                  { id: 'Cuadrado', label: 'Cuadrado', icon: 'square' },
+                  { id: 'Rectangular', label: 'Rectangular', icon: 'rectangle' },
+                  { id: 'Irregular', label: 'Irregular', icon: 'polyline' }
+                ]" 
+                :key="forma.id"
+                @click="inspeccionStore.inspeccionActual.forma_pozo = forma.id"
+                :class="inspeccionStore.inspeccionActual.forma_pozo === forma.id 
+                  ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                class="flex items-center justify-center gap-2 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
               >
-                <option value="Circular">Circular</option>
-                <option value="Cuadrado">Cuadrado</option>
-                <option value="Rectangular">Rectangular</option>
-                <option value="Irregular">Irregular</option>
-              </select>
-              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                <span class="material-symbols-outlined text-lg">{{ forma.icon }}</span>
+                {{ forma.label }}
+              </button>
             </div>
           </div>
 
