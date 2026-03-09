@@ -114,6 +114,12 @@ export const useInspeccionStore = defineStore('inspeccion', {
                     this.inspeccionActual.largo_pozo_mm = ultimo.largo_pozo_mm || null;
                     this.inspeccionActual.ancho_pozo_mm = ultimo.ancho_pozo_mm || null;
                     this.inspeccionActual.tipo_acceso = ultimo.tipo_acceso || 'Ninguno';
+
+                    // Herencia Paso 5: Red y Colector
+                    this.inspeccionActual.colector_mat_entrada = ultimo.colector_mat_entrada || 'PVC';
+                    this.inspeccionActual.colector_diametro_entrada_mm = ultimo.colector_diametro_entrada_mm || null;
+                    this.inspeccionActual.colector_mat_salida = ultimo.colector_mat_salida || 'PVC';
+                    this.inspeccionActual.colector_diametro_salida_mm = ultimo.colector_diametro_salida_mm || null;
                 }
             } catch (error) {
                 console.warn('No se pudo recuperar datos de herencia, usando valores por defecto:', error);

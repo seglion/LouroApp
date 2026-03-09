@@ -18,6 +18,9 @@
     - [x] Preseleccionar `forma_pozo`, `material_pozo` y dimensiones del pozo anterior.
     - [x] Default `diametro_pozo_mm`: 1000.
     - [x] Default `tipo_acceso`: 'Ninguno'.
+- [x] **Paso 5 (Red):**
+    - [x] Preseleccionar materiales y diámetros de los colectores del pozo anterior.
+    - [x] Default materiales: 'PVC'.
 
 ## Verificación
 - [ ] Crear una inspección, completarla, y verificar que la siguiente herede los valores indicados.
