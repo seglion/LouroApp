@@ -106,17 +106,17 @@
               <div class="grid grid-cols-2 gap-6">
                 <div class="flex flex-col gap-3 col-span-2">
                   <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Entrada</label>
-                  <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
                     <button 
-                      v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocie']" 
-                      :key="m"
-                      @click="inspeccionStore.inspeccionActual.colector_mat_entrada = m === 'Fibrocie' ? 'Fibrocemento' : m"
-                      :class="inspeccionStore.inspeccionActual.colector_mat_entrada === (m === 'Fibrocie' ? 'Fibrocemento' : m) 
-                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm' 
-                        : 'text-slate-500 hover:text-slate-700'"
-                      class="py-3 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all"
+                      v-for="m in materialesList" 
+                      :key="m.id"
+                      @click="inspeccionStore.inspeccionActual.colector_mat_entrada = m.id"
+                      :class="inspeccionStore.inspeccionActual.colector_mat_entrada === m.id 
+                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                      class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
                     >
-                      {{ m }}
+                      {{ m.label }}
                     </button>
                   </div>
                 </div>
@@ -146,17 +146,17 @@
               <div class="grid grid-cols-2 gap-6">
                 <div class="flex flex-col gap-3 col-span-2">
                   <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Salida</label>
-                  <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
                     <button 
-                      v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocie']" 
-                      :key="m"
-                      @click="inspeccionStore.inspeccionActual.colector_mat_salida = m === 'Fibrocie' ? 'Fibrocemento' : m"
-                      :class="inspeccionStore.inspeccionActual.colector_mat_salida === (m === 'Fibrocie' ? 'Fibrocemento' : m) 
-                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm' 
-                        : 'text-slate-500 hover:text-slate-700'"
-                      class="py-3 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all"
+                      v-for="m in materialesList" 
+                      :key="m.id"
+                      @click="inspeccionStore.inspeccionActual.colector_mat_salida = m.id"
+                      :class="inspeccionStore.inspeccionActual.colector_mat_salida === m.id 
+                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                      class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
                     >
-                      {{ m }}
+                      {{ m.label }}
                     </button>
                   </div>
                 </div>
@@ -186,6 +186,15 @@
 import { useInspeccionStore } from '@/store/inspeccion';
 
 const inspeccionStore = useInspeccionStore();
+
+const materialesList = [
+  { id: 'Hormigón', label: 'Hormigón' },
+  { id: 'Gres', label: 'Gres' },
+  { id: 'PVC', label: 'PVC' },
+  { id: 'PEAD', label: 'PEAD' },
+  { id: 'Fundición', label: 'Fundición' },
+  { id: 'Fibrocemento', label: 'Fibrocemento' }
+];
 </script>
 
 <style scoped>
