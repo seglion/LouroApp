@@ -125,7 +125,20 @@ export const useInspeccionStore = defineStore('inspeccion', {
             if (data) {
                 // Separar metadatos de IndexedDB de los datos de la inspección
                 const { sync_status, last_modified, blob_foto_situacion, blob_foto_interior, ...datosInspeccion } = data;
-                this.inspeccionActual = datosInspeccion;
+
+                // Mezclar con el estado inicial para rellenar campos vacíos en borradores antiguos
+                const defaults = getInitialState().inspeccionActual;
+                this.inspeccionActual = {
+                    ...defaults,
+                    ...datosInspeccion,
+                    // Asegurar que si los strings están vacíos pero tienen default, se usen los defaults
+                    colector_mat_entrada: datosInspeccion.colector_mat_entrada || defaults.colector_mat_entrada,
+                    colector_mat_salida: datosInspeccion.colector_mat_salida || defaults.colector_mat_salida,
+                    material_pozo: datosInspeccion.material_pozo || defaults.material_pozo,
+                    tapa_material: datosInspeccion.tapa_material || defaults.tapa_material,
+                    tapa_forma: datosInspeccion.tapa_forma || defaults.tapa_forma,
+                    tapa_tipo: datosInspeccion.tapa_tipo || defaults.tapa_tipo
+                };
 
                 // Reconstruir URLs temporales si hay blobs persistidos
                 if (blob_foto_situacion) {
@@ -148,7 +161,20 @@ export const useInspeccionStore = defineStore('inspeccion', {
 
                 if (ultimo && ultimo.sync_status === 'pending') {
                     const { sync_status, last_modified, ...datos } = ultimo;
-                    this.inspeccionActual = datos;
+
+                    // Aplicar defaults a campos vacíos
+                    const defaults = getInitialState().inspeccionActual;
+                    this.inspeccionActual = {
+                        ...defaults,
+                        ...datos,
+                        colector_mat_entrada: datos.colector_mat_entrada || defaults.colector_mat_entrada,
+                        colector_mat_salida: datos.colector_mat_salida || defaults.colector_mat_salida,
+                        material_pozo: datos.material_pozo || defaults.material_pozo,
+                        tapa_material: datos.tapa_material || defaults.tapa_material,
+                        tapa_forma: datos.tapa_forma || defaults.tapa_forma,
+                        tapa_tipo: datos.tapa_tipo || defaults.tapa_tipo
+                    };
+
                     console.log('Sesión recuperada automáticamente:', ultimo.id);
                     return true;
                 }
