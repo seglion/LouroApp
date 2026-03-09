@@ -16,24 +16,8 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Cota de la Tapa -->
-          <div class="flex flex-col gap-3">
-            <label for="cota_tapa" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Cota de la Tapa (m)</label>
-            <div class="relative group">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors z-10">height</span>
-              <input 
-                id="cota_tapa" 
-                v-model.number="inspeccionStore.inspeccionActual.cota_tapa"
-                type="number" 
-                step="0.01"
-                placeholder="0.00"
-                class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
-              />
-            </div>
-          </div>
-
           <!-- Forma de la Tapa -->
-          <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-3 md:col-span-2">
             <label for="tapa_forma" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Forma de la Tapa</label>
             <div class="relative group">
               <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors z-10">category</span>

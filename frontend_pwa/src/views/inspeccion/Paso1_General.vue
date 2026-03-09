@@ -103,8 +103,8 @@
 
         <!-- Coordenadas UTM Section -->
         <div class="sm:col-span-2 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
-          <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Georreferenciación UTM (Huso 29N)</label>
-          <div class="grid grid-cols-2 gap-6">
+          <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Georreferenciación y Cota (Huso 29N)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
             <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
               <span class="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">Coordenada X (Easting)</span>
               <input 
@@ -120,6 +120,16 @@
                 v-model.number="inspeccionStore.inspeccionActual.coordenadas_utm.y"
                 type="number" 
                 step="0.01"
+                class="w-full bg-transparent border-none p-0 font-mono text-2xl font-black text-slate-900 dark:text-white focus:ring-0"
+              />
+            </div>
+            <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+              <span class="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">Cota Z (Tapa)</span>
+              <input 
+                v-model.number="inspeccionStore.inspeccionActual.cota_tapa"
+                type="number" 
+                step="0.01"
+                placeholder="0.00"
                 class="w-full bg-transparent border-none p-0 font-mono text-2xl font-black text-slate-900 dark:text-white focus:ring-0"
               />
             </div>
@@ -304,6 +314,7 @@ input::-webkit-inner-spin-button {
 }
 input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Transiciones de entrada */
