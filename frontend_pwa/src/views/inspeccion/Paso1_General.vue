@@ -42,14 +42,28 @@
               v-model="inspeccionStore.inspeccionActual.id_pozo"
               type="text" 
               placeholder="P-0000"
-              list="pozos-radar-list"
+              @focus="menuSugerenciasAbierto = true"
+              @blur="cerrarMenuSugerencias"
               class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
             />
             
-            <!-- Datalist para autocompletado nativo -->
-            <datalist id="pozos-radar-list">
-              <option v-for="id in pozosDetectadosIds" :key="id" :value="id" />
-            </datalist>
+            <!-- Menú Desplegable Técnico (Alternativa a Datalist) -->
+            <div v-if="menuSugerenciasAbierto && pozosDetectadosIds.length > 0" class="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 animate-in border-t-4 border-t-accent-blue">
+              <div 
+                v-for="id in pozosDetectadosIds" 
+                :key="id"
+                @click="inspeccionStore.inspeccionActual.id_pozo = id; menuSugerenciasAbierto = false"
+                class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer flex items-center justify-between group transition-colors"
+                :class="inspeccionStore.inspeccionActual.id_pozo === id ? 'bg-blue-50 dark:bg-blue-900/20' : ''"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-slate-400 group-hover:text-accent-blue transition-colors">location_searching</span>
+                  <span class="text-sm font-black text-slate-700 dark:text-slate-300 group-hover:text-accent-blue">{{ id }}</span>
+                </div>
+                <span v-if="inspeccionStore.inspeccionActual.id_pozo === id" class="material-symbols-outlined text-accent-blue text-sm">check_circle</span>
+                <span v-else class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">A 100m</span>
+              </div>
+            </div>
           </div>
           
           <!-- Sugerencias del Radar (Carrusel Lateral) -->
@@ -204,7 +218,14 @@ const pozosInventario = [
 ];
 
 const pozosDetectadosIds = ref<string[]>([]);
+const menuSugerenciasAbierto = ref(false);
 const precisionGPS = ref<number | null>(null);
+
+const cerrarMenuSugerencias = () => {
+  setTimeout(() => {
+    menuSugerenciasAbierto.value = false;
+  }, 200);
+};
 
 const coordenadasListas = computed(() => {
   return inspeccionStore.inspeccionActual.coordenadas_utm.x !== null 
