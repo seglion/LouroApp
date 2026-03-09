@@ -65,15 +65,15 @@ export const useInspeccionStore = defineStore('inspeccion', {
                     const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
                     return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
                 case 2:
-                    const dimOk = i.forma_pozo === 'Circular'
-                        ? (i.diametro_pozo_mm && i.diametro_pozo_mm > 0)
-                        : (i.largo_pozo_mm && i.largo_pozo_mm > 0 && i.ancho_pozo_mm && i.ancho_pozo_mm > 0);
-                    return !!(i.material_pozo && i.profundidad_m && i.tipo_acceso && dimOk);
-                case 3:
                     const tapaOk = i.tapa_forma === 'Circular'
                         ? (i.tapa_diametro_mm && i.tapa_diametro_mm > 0)
                         : (i.tapa_largo_mm && i.tapa_largo_mm > 0 && i.tapa_ancho_mm && i.tapa_ancho_mm > 0);
                     return !!(i.tapa_material && i.tapa_tipo && tapaOk);
+                case 3:
+                    const dimOk = i.forma_pozo === 'Circular'
+                        ? (i.diametro_pozo_mm && i.diametro_pozo_mm > 0)
+                        : (i.largo_pozo_mm && i.largo_pozo_mm > 0 && i.ancho_pozo_mm && i.ancho_pozo_mm > 0);
+                    return !!(i.material_pozo && i.profundidad_m && i.tipo_acceso && dimOk);
                 case 4:
                     return !!(i.estado && i.limpieza);
                 case 5:

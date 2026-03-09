@@ -77,16 +77,16 @@ const inspeccionStore = useInspeccionStore();
 
 const titulos = [
     "Ubicación y General",
-    "Detalles del Pozo",
     "Detalles de la Tapa",
+    "Detalles del Pozo",
     "Estado y Entorno",
     "Red y Colector",
     "Acometidas domiciliarias"
 ];
 
 const labelsBotones = [
-    "Ir a Detalles",
     "Ir a Tapa",
+    "Ir a Detalles Pozo",
     "Ir a Estado",
     "Ir a Red",
     "Ir a Acometidas",

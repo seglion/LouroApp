@@ -33,12 +33,12 @@ const router = createRouter({
                 {
                     path: 'paso-2',
                     name: 'inspeccion-paso-2',
-                    component: () => import('../views/inspeccion/Paso2_Detalles.vue')
+                    component: () => import('../views/inspeccion/Paso3_Tapa.vue')
                 },
                 {
                     path: 'paso-3',
                     name: 'inspeccion-paso-3',
-                    component: () => import('../views/inspeccion/Paso3_Tapa.vue')
+                    component: () => import('../views/inspeccion/Paso2_Detalles.vue')
                 },
                 {
                     path: 'paso-4',
