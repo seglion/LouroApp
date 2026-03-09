@@ -29,7 +29,7 @@ const getInitialState = () => ({
         observaciones: '',
         tapa_forma: '',
         tapa_tipo: '',
-        tapa_material: '',
+        tapa_material: 'Fundición Dúctil',
         tapa_diametro_mm: null as number | null,
         tapa_largo_mm: null as number | null,
         tapa_ancho_mm: null as number | null,
