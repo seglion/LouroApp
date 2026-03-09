@@ -104,24 +104,29 @@
               </div>
 
               <div class="grid grid-cols-2 gap-6">
-                <div class="flex flex-col gap-3">
-                  <label for="mat_entrada" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material</label>
-                  <select 
-                    id="mat_entrada" 
-                    v-model="inspeccionStore.inspeccionActual.colector_mat_entrada"
-                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none appearance-none"
-                  >
-                    <option value="" disabled>Seleccione...</option>
-                    <option v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocemento']" :key="m" :value="m">{{ m }}</option>
-                  </select>
+                <div class="flex flex-col gap-3 col-span-2">
+                  <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Entrada</label>
+                  <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button 
+                      v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocie']" 
+                      :key="m"
+                      @click="inspeccionStore.inspeccionActual.colector_mat_entrada = m === 'Fibrocie' ? 'Fibrocemento' : m"
+                      :class="inspeccionStore.inspeccionActual.colector_mat_entrada === (m === 'Fibrocie' ? 'Fibrocemento' : m) 
+                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-700'"
+                      class="py-3 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all"
+                    >
+                      {{ m }}
+                    </button>
+                  </div>
                 </div>
-                <div class="flex flex-col gap-3">
-                  <label for="diam_entrada" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro (mm)</label>
+                <div class="flex flex-col gap-3 col-span-2">
+                  <label for="diam_entrada" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Entrada (mm)</label>
                   <input 
                     id="diam_entrada" 
                     v-model.number="inspeccionStore.inspeccionActual.colector_diametro_entrada_mm"
                     type="number" 
-                    placeholder="DN"
+                    placeholder="Ej. 300"
                     class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
                   />
                 </div>
@@ -139,24 +144,29 @@
               </div>
 
               <div class="grid grid-cols-2 gap-6">
-                <div class="flex flex-col gap-3">
-                  <label for="mat_salida" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material</label>
-                  <select 
-                    id="mat_salida" 
-                    v-model="inspeccionStore.inspeccionActual.colector_mat_salida"
-                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none appearance-none"
-                  >
-                    <option value="" disabled>Seleccione...</option>
-                    <option v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocemento']" :key="m" :value="m">{{ m }}</option>
-                  </select>
+                <div class="flex flex-col gap-3 col-span-2">
+                  <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Salida</label>
+                  <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button 
+                      v-for="m in ['Hormigón', 'Gres', 'PVC', 'PEAD', 'Fundición', 'Fibrocie']" 
+                      :key="m"
+                      @click="inspeccionStore.inspeccionActual.colector_mat_salida = m === 'Fibrocie' ? 'Fibrocemento' : m"
+                      :class="inspeccionStore.inspeccionActual.colector_mat_salida === (m === 'Fibrocie' ? 'Fibrocemento' : m) 
+                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-700'"
+                      class="py-3 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all"
+                    >
+                      {{ m }}
+                    </button>
+                  </div>
                 </div>
-                <div class="flex flex-col gap-3">
-                  <label for="diam_salida" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro (mm)</label>
+                <div class="flex flex-col gap-3 col-span-2">
+                  <label for="diam_salida" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Salida (mm)</label>
                   <input 
                     id="diam_salida" 
                     v-model.number="inspeccionStore.inspeccionActual.colector_diametro_salida_mm"
                     type="number" 
-                    placeholder="DN"
+                    placeholder="Ej. 300"
                     class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
                   />
                 </div>

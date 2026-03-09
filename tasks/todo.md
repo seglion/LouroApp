@@ -1,15 +1,16 @@
-# Plan de Acción: Refinamiento Paso 3 (Tapa)
+# Plan de Acción: Refinamiento Paso 5 (Red y Colector)
 
 ## Análisis y Diseño
-- [x] Analizar el componente `Paso3_Tapa.vue`.
-- [x] Localizar el estado inicial en `src/store/inspeccion.ts`.
+- [x] Analizar el componente `Paso5_RedColector.vue`.
+- [x] Identificar los campos de material de colector de entrada y salida.
 
 ## Implementación
-- [ ] **Store:** Cambiar el valor inicial de `tapa_material` a 'Fundición Dúctil' en `getInitialState`.
-- [ ] **Paso 3 (Tapa):** Sustituir el `<select>` de `tapa_forma` por botones segmentados con iconos, similar al Paso 2.
-- [ ] **Paso 3 (Tapa):** Asegurar que las dimensiones dinámicas sigan funcionando con el nuevo control.
+- [ ] **Store:** Cambiar el valor inicial de `colector_mat_entrada` a 'PVC' en `src/store/inspeccion.ts`.
+- [ ] **Store:** Cambiar el valor inicial de `colector_mat_salida` a 'PVC' en `src/store/inspeccion.ts`.
+- [ ] **Paso 5 (Red Colector):** Sustituir el `<select>` de material entrada por botones segmentados (estilo industrial).
+- [ ] **Paso 5 (Red Colector):** Sustituir el `<select>` de material salida por botones segmentados (estilo industrial).
 
 ## Revisión Final
-- [ ] Validar que una nueva inspección comience con "Fundición Dúctil" ya seleccionado.
-- [ ] Comprobar que los botones de forma de tapa funcionan correctamente.
-- [ ] Realizar commit con los cambios.
+- [ ] Verificar que una nueva inspección comience con "PVC" en ambos colectores.
+- [ ] Comprobar que los nuevos botones funcionan y actualizan el store.
+- [ ] Guardar cambios y realizar commit.
