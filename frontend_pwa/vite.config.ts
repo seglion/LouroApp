@@ -9,6 +9,9 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,geojson}']
+      },
       manifest: {
         name: 'REGISTRO SANEAMIENTO CONSORCIO LOURO',
         short_name: 'LOURO GIS',
