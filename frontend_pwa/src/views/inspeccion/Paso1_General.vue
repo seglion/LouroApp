@@ -15,7 +15,7 @@
       <div class="absolute bottom-4 left-4 z-10 px-3 py-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2">
         <div class="flex h-2 w-2 rounded-full" :class="coordenadasListas ? 'bg-green-500' : 'bg-amber-500 animate-pulse'"></div>
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
-          {{ coordenadasListas ? `GPS Fix: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
+          {{ coordenadasListas ? `Radar: 40m | GPS: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
         </span>
       </div>
     </div>
@@ -61,14 +61,14 @@
                   <span class="text-sm font-black text-slate-700 dark:text-slate-300 group-hover:text-accent-blue">{{ id }}</span>
                 </div>
                 <span v-if="inspeccionStore.inspeccionActual.id_pozo === id" class="material-symbols-outlined text-accent-blue text-sm">check_circle</span>
-                <span v-else class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">A 100m</span>
+                <span v-else class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">A 40m</span>
               </div>
             </div>
           </div>
           
           <!-- Sugerencias del Radar (Carrusel Lateral) -->
           <div v-if="pozosDetectadosIds.length > 0" class="flex flex-col gap-2 animate-in overflow-hidden">
-            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (100m)</span>
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (40m)</span>
             <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 px-1 scrollbar-hide snap-x">
               <button 
                 v-for="id in pozosDetectadosIds" 
@@ -122,7 +122,16 @@
         <div class="flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <label for="calle_zona" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Calle / Localización</label>
-            <span v-if="!isOnline" class="text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 uppercase">Offline</span>
+            <div class="flex gap-2 items-center">
+              <button 
+                type="button"
+                @click="simularAsGandaras"
+                class="text-[9px] font-black text-white bg-slate-900 dark:bg-accent-blue px-3 py-1 rounded-full uppercase hover:scale-105 active:scale-95 transition-all"
+              >
+                Simular As Gándaras
+              </button>
+              <span v-if="!isOnline" class="text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 uppercase">Offline</span>
+            </div>
           </div>
           <div class="relative group">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors">location_on</span>
@@ -134,6 +143,26 @@
               class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
             />
           </div>
+        </div>
+
+        <!-- Estado Especial: No Inspeccionable -->
+        <div class="sm:col-span-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl transition-all group" :class="{ '!bg-red-50 !border-red-200 dark:!bg-red-900/20 dark:!border-red-900/50 ring-4 ring-red-600/5': inspeccionStore.inspeccionActual.no_inspeccionable }">
+          <label class="flex items-center gap-4 cursor-pointer select-none">
+            <div class="relative flex items-center">
+              <input 
+                type="checkbox" 
+                v-model="inspeccionStore.inspeccionActual.no_inspeccionable"
+                class="peer sr-only"
+              />
+              <div class="w-14 h-14 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-2xl flex items-center justify-center transition-all peer-checked:bg-red-600 peer-checked:border-red-600 peer-checked:scale-95 shadow-lg group-active:scale-90">
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-600 peer-checked:text-white transition-all scale-75 peer-checked:scale-110">block</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.1em]" :class="{ 'text-red-700 dark:text-red-400': inspeccionStore.inspeccionActual.no_inspeccionable }">No se puede inspeccionar</span>
+              <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wide opacity-70">Activa si el pozo está asfaltado o la tapa bloqueada</span>
+            </div>
+          </label>
         </div>
 
         <!-- Coordenadas UTM Section -->
@@ -181,6 +210,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useInspeccionStore } from '@/store/inspeccion';
+import { db } from '@/db/db';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import proj4 from 'proj4';
@@ -207,15 +237,10 @@ let map: L.Map | null = null;
 let marker: L.Marker | null = null;
 let radarCircle: L.Circle | null = null;
 let nearbyWellsLayer: L.LayerGroup | null = null;
+let gisLayers: { [key: string]: L.Layer } = {};
 
-// Mock de Inventario de Pozos (Datos de ejemplo) centrado en 523380.97, 4676363.63
-const pozosInventario = [
-  { id: 'P-8001', x: 523380.97 + 25, y: 4676363.63 + 30 },
-  { id: 'P-8002', x: 523380.97 - 40, y: 4676363.63 - 20 },
-  { id: 'P-8003', x: 523380.97 + 10, y: 4676363.63 - 55 },
-  { id: 'P-8004', x: 523380.97 - 65, y: 4676363.63 + 45 },
-  { id: 'P-OUT',  x: 524380.97, y: 4677363.63 }, // Fuera de radar
-];
+// Inventario de Pozos de Proximidad
+const pozosCercanos = ref<any[]>([]);
 
 const pozosDetectadosIds = ref<string[]>([]);
 const menuSugerenciasAbierto = ref(false);
@@ -239,15 +264,23 @@ onMounted(() => {
   
   map = L.map('map-step-1', {
     zoomControl: false,
-    attributionControl: false
+    attributionControl: false,
+    maxZoom: 22
   }).setView([lat, lng], 18);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community',
-    maxZoom: 19
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 22,
+    maxNativeZoom: 19
   }).addTo(map);
 
   nearbyWellsLayer = L.layerGroup().addTo(map);
+
+  // [NUEVO] Capas de Red y Zona
+  cargarCapasGIS();
+
+  // Cargar inventario de pozos (GeoJSON)
+  cargarInventario();
 
   // Si ya hay coordenadas, poner el marcador
   actualizarMarcador();
@@ -301,6 +334,22 @@ const capturarGPS = () => {
   }
 };
 
+const simularAsGandaras = () => {
+  // Coordenadas aproximadas en el centro del polígono de As Gándaras (Porriño)
+  const [lng, lat] = [-8.616, 42.137];
+  const [utmX, utmY] = proj4(WGS84, UTM_29N, [lng, lat]);
+  
+  inspeccionStore.inspeccionActual.coordenadas_utm = {
+    x: Number(utmX.toFixed(2)),
+    y: Number(utmY.toFixed(2))
+  };
+  
+  inspeccionStore.inspeccionActual.calle_zona = "Polígono As Gándaras (SIMULADO)";
+  precisionGPS.value = 5; // Simular alta precisión
+  
+  console.log("Simulación en As Gándaras activada para pruebas GIS.");
+};
+
 const buscarDireccion = async (lat: number, lng: number) => {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
@@ -352,6 +401,8 @@ const actualizarMarcador = () => {
         // 1. Actualizar Marcador Usuario
         if (marker) map.removeLayer(marker);
         marker = L.marker(coords, {
+          interactive: false, // Permite clickear lo que haya debajo
+          zIndexOffset: -100, // Lo mantiene por debajo de los pozos en términos de click
           icon: L.divIcon({
             className: 'custom-user-marker',
             html: `<div class="radar-pulse"></div><div class="inner-dot"></div>`,
@@ -360,14 +411,14 @@ const actualizarMarcador = () => {
           })
         }).addTo(map);
 
-        // 2. Actualizar Radar (100m)
+        // 2. Actualizar Radar (40m)
         if (radarCircle) map.removeLayer(radarCircle);
         radarCircle = L.circle(coords, {
-          radius: 100,
-          color: '#99CCFF',
-          fillColor: '#99CCFF',
+          radius: 40,
+          color: '#FACC15', // Amarillo para contraste
+          fillColor: '#FACC15',
           fillOpacity: 0.1,
-          weight: 1,
+          weight: 1.5,
           dashArray: '5, 5',
           interactive: false
         }).addTo(map);
@@ -383,41 +434,176 @@ const actualizarMarcador = () => {
   }
 };
 
-const actualizarPozosCercanos = (userX: number, userY: number) => {
+const cargarInventario = async () => {
+  try {
+    // 1. Verificar si ya tenemos datos en IndexedDB
+    const totalEnDb = await db.inventario_pozos.count();
+    
+    if (totalEnDb === 0) {
+      console.log("Inventario vacío. Descargando repositorio de pozos...");
+      const response = await fetch('/data/pozos.geojson');
+      if (!response.ok) throw new Error("No se pudo descargar el inventario inicial.");
+      
+      const data = await response.json();
+      if (data && data.features) {
+        console.log("Procesando e indexando pozos para uso offline...");
+        const batch = data.features.map((f: any) => ({
+          id: String(f.properties.COD_CAMPO || f.properties.ObjectId || f.properties.id),
+          x: f.geometry.coordinates[0],
+          y: f.geometry.coordinates[1],
+          properties: f.properties
+        }));
+        
+        await db.inventario_pozos.bulkAdd(batch);
+        console.log(`¡Inventario indexado! ${batch.length} pozos guardados.`);
+      }
+    } else {
+      // Verificar si los datos existentes son antiguos (ObjectId vs COD_CAMPO)
+      const primerPozo = await db.inventario_pozos.limit(1).toArray();
+      if (primerPozo.length > 0 && primerPozo[0] && !isNaN(Number(primerPozo[0].id))) {
+        console.log("Detectado formato antiguo. Limpiando caché de pozos...");
+        await db.inventario_pozos.clear();
+        return cargarInventario(); // Re-intentar carga con nuevo formato
+      }
+      console.log(`Usando inventario local offline (${totalEnDb} pozos detectados).`);
+    }
+
+    // Calcular pozos cercanos si ya tenemos GPS
+    const x = inspeccionStore.inspeccionActual.coordenadas_utm.x;
+    const y = inspeccionStore.inspeccionActual.coordenadas_utm.y;
+    if (x && y) actualizarPozosCercanos(x, y);
+
+  } catch (err) {
+    console.warn("No se pudo cargar el inventario (¿Modo avión inicial?):", err);
+  }
+};
+
+const cargarCapasGIS = async () => {
+  if (!map) return;
+
+  const capas = [
+    { url: '/data/principales.geojson', style: { color: '#FF0000', weight: 6, opacity: 1 }, name: 'principales' },
+    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' }
+  ];
+
+  for (const capa of capas) {
+    try {
+      const resp = await fetch(capa.url);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      
+      gisLayers[capa.name] = L.geoJSON(data, {
+        style: capa.style,
+        interactive: false,
+        coordsToLatLng: (coords) => {
+          // Si las coordenadas son muy grandes, asumimos que son UTM y proyectamos
+          if (Math.abs(coords[0]) > 180) {
+            const [lng, lat] = proj4(UTM_29N, WGS84, [coords[0], coords[1]]);
+            return L.latLng(lat, lng);
+          }
+          return L.latLng(coords[1], coords[0]);
+        }
+      }).addTo(map);
+    } catch (e) {
+      console.warn(`No se pudo cargar la capa GIS ${capa.name}:`, e);
+    }
+  }
+};
+
+const actualizarPozosCercanos = async (userX: number, userY: number) => {
   if (!nearbyWellsLayer || !map) return;
   nearbyWellsLayer.clearLayers();
   
+  const radioBusqueda = 40;
+
+  // Búsqueda espacial optimizada: Filtramos primero por Bounding Box cuadrado 
+  // antes de calcular la distancia euclídea exacta
+  const pozosEnRango = await db.inventario_pozos
+    .where('x').between(userX - radioBusqueda, userX + radioBusqueda)
+    .and(pozo => {
+      const dist = Math.sqrt(Math.pow(pozo.x - userX, 2) + Math.pow(pozo.y - userY, 2));
+      return dist <= radioBusqueda;
+    })
+    .toArray();
+
   const detectados: string[] = [];
+  pozosCercanos.value = pozosEnRango;
 
-  pozosInventario.forEach(pozo => {
-    const dist = Math.sqrt(Math.pow(pozo.x - userX, 2) + Math.pow(pozo.y - userY, 2));
+  pozosEnRango.forEach(pozo => {
+    detectados.push(pozo.id);
+    const isSelected = pozo.id === inspeccionStore.inspeccionActual.id_pozo;
+    const [lng, lat] = proj4(UTM_29N, WGS84, [pozo.x, pozo.y]);
     
-    if (dist <= 100) {
-      detectados.push(pozo.id);
-      const [lng, lat] = proj4(UTM_29N, WGS84, [pozo.x, pozo.y]);
-      const wellMarker = L.marker([lat, lng], {
-        icon: L.divIcon({
-          className: 'well-marker-radar',
-          html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
-        })
-      });
+    const wellMarker = L.marker([lat, lng], {
+      zIndexOffset: isSelected ? 2000 : 500, // Siempre por encima de las redes y del GPS si está seleccionado
+      icon: L.divIcon({
+        className: `well-marker-radar ${isSelected ? 'is-selected' : ''}`,
+        html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+      })
+    });
 
-      wellMarker.on('click', () => {
-        inspeccionStore.inspeccionActual.id_pozo = pozo.id;
-        // Efecto haptico visual (glow temporal) puede ir aquí
-      });
+    wellMarker.on('click', () => {
+      inspeccionStore.inspeccionActual.id_pozo = pozo.id;
+    });
 
-      wellMarker.addTo(nearbyWellsLayer!);
-    }
+    wellMarker.addTo(nearbyWellsLayer!);
   });
 
   pozosDetectadosIds.value = detectados;
 };
 
-// Observar cambios en coordenadas para mover el marcador
-watch(() => inspeccionStore.inspeccionActual.coordenadas_utm, actualizarMarcador, { deep: true });
+// Observar cambios en el ID seleccionado para repintar el marcador seleccionado sin mover el radar
+watch(() => inspeccionStore.inspeccionActual.id_pozo, () => {
+  // Solo repintamos los marcadores existentes para actualizar el estado visual (is-selected)
+  // sin volver a filtrar por distancia, para no perder los "compañeros" de la lista
+  repintarMarcadores();
+});
+
+const repintarMarcadores = () => {
+  if (!nearbyWellsLayer || !map) return;
+  
+  // En lugar de borrar todo, recorremos y actualizamos clases si fuera posible, 
+  // pero Leaflet L.LayerGroup es más sencillo de recrear si no hay miles de puntos.
+  // Dado que radioBusqueda es 100m, habrá pocos pozos.
+  const x = inspeccionStore.inspeccionActual.coordenadas_utm.x;
+  const y = inspeccionStore.inspeccionActual.coordenadas_utm.y;
+  if (x && y) actualizarPozosCercanos(x, y);
+};
+
+// Lógica para Pozo No Inspeccionable
+watch(() => inspeccionStore.inspeccionActual.no_inspeccionable, (newVal) => {
+  if (newVal) {
+    const i = inspeccionStore.inspeccionActual;
+    // Poner a 0 diámetros y dimensiones
+    i.tapa_diametro_mm = 0;
+    i.tapa_largo_mm = 0;
+    i.tapa_ancho_mm = 0;
+    i.diametro_pozo_mm = 0;
+    i.largo_pozo_mm = 0;
+    i.ancho_pozo_mm = 0;
+    i.colector_diametro_entrada_mm = 0;
+    i.colector_diametro_salida_mm = 0;
+    i.profundidad_m = 0;
+    i.num_pates = 0;
+    
+    // Comentarios y estados
+    i.observaciones = "No se puede Inspeccionar";
+    i.estado = "Deficiente";
+    i.limpieza = "No procede";
+  }
+});
+
+// Observar cambios en coordenadas para mover el marcador y buscar dirección
+watch(() => inspeccionStore.inspeccionActual.coordenadas_utm, (newCoords) => {
+  actualizarMarcador();
+  
+  if (newCoords.x && newCoords.y && navigator.onLine) {
+    const [lng, lat] = proj4(UTM_29N, WGS84, [newCoords.x, newCoords.y]);
+    buscarDireccion(lat, lng);
+  }
+}, { deep: true });
 
 </script>
 
@@ -492,16 +678,31 @@ input[type=number] {
 }
 :deep(.well-label) {
   position: absolute;
-  top: 14px;
-  background: #363842;
-  color: white;
-  font-size: 8px;
+  top: 18px;
+  background: #000000;
+  color: #FFFFFF;
+  font-size: 11px;
   font-weight: 900;
-  padding: 1px 4px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 1;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Estado Seleccionado */
+:deep(.well-marker-radar.is-selected .well-dot) {
+  background: #3b82f6;
+  border-color: white;
+  transform: scale(1.4);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+}
+:deep(.well-marker-radar.is-selected .well-label) {
+  background: #3b82f6;
+  opacity: 1;
+  transform: translateY(2px) scale(1.1);
 }
 
 /* Utilidades para el Carrusel */

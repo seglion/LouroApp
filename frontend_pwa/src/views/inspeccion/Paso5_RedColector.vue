@@ -47,6 +47,56 @@
               </div>
             </div>
 
+            <!-- Mapa de Conectividad Interactiva -->
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Mapa de Conectividad</label>
+                <div class="flex gap-2">
+                  <button 
+                    @click="modoSeleccion = 'desde'"
+                    :class="modoSeleccion === 'desde' ? 'bg-green-600 text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                    class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-xs">login</span> Origen
+                  </button>
+                  <button 
+                    @click="modoSeleccion = 'hacia'"
+                    :class="modoSeleccion === 'hacia' ? 'bg-accent-blue text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                    class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-xs">logout</span> Destino
+                  </button>
+                </div>
+              </div>
+              
+              <div class="relative group">
+                <div v-if="!inspeccionStore.inspeccionActual.coordenadas_utm.x" class="absolute inset-0 bg-slate-200 dark:bg-slate-800 rounded-2xl flex flex-col items-center justify-center gap-2 z-10 p-6 text-center">
+                  <span class="material-symbols-outlined text-4xl text-slate-400 animate-pulse">location_off</span>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Ubicación no disponible</p>
+                  <p class="text-[8px] font-medium text-slate-400">Capture la ubicación en el Paso 1 para habilitar el mapa de red.</p>
+                </div>
+                <div id="map-connectivity" class="w-full h-[240px] min-h-[240px] rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-inner z-0 bg-slate-100 dark:bg-slate-900 transition-opacity" :class="!inspeccionStore.inspeccionActual.coordenadas_utm.x ? 'opacity-20' : 'opacity-100'"></div>
+                <!-- Overlay de modo -->
+                <div v-if="modoSeleccion" class="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200 dark:border-slate-800 rounded-full shadow-2xl z-[1000] pointer-events-none animate-bounce flex items-center gap-2">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="modoSeleccion === 'desde' ? 'bg-green-400' : 'bg-accent-blue'"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2" :class="modoSeleccion === 'desde' ? 'bg-green-500' : 'bg-accent-blue'"></span>
+                  </span>
+                  <span class="text-[9px] font-black uppercase tracking-widest" :class="modoSeleccion === 'desde' ? 'text-green-600' : 'text-accent-blue'">
+                    Clic en pozo para: {{ modoSeleccion === 'desde' ? 'ORIGEN' : 'DESTINO' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Indicador de sentido -->
+              <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo && inspeccionStore.inspeccionActual.red_va_a_pozo" 
+                   class="flex items-center justify-center gap-4 py-2 bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_viene_de_pozo }}</span>
+                <span class="material-symbols-outlined text-slate-400 text-sm">trending_flat</span>
+                <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_va_a_pozo }}</span>
+              </div>
+            </div>
+
             <!-- Tipo de Red -->
             <div class="flex flex-col gap-4">
               <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Tipo de Red</label>
@@ -183,9 +233,34 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { useInspeccionStore } from '@/store/inspeccion';
+import L from 'leaflet';
+import proj4 from 'proj4';
+import 'leaflet/dist/leaflet.css';
+
+// Fix para iconos de Leaflet en producción
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+});
+
+const UTM_29N = "+proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs";
+const WGS84 = "EPSG:4326";
 
 const inspeccionStore = useInspeccionStore();
+const modoSeleccion = ref<'desde' | 'hacia' | null>(null);
+
+let map: L.Map | null = null;
+let wellsLayer: L.LayerGroup | null = null;
+let networkLines: L.Polyline | null = null;
+let gisLayers: { [key: string]: L.Layer } = {};
 
 const materialesList = [
   { id: 'Hormigón', label: 'Hormigón' },
@@ -195,6 +270,173 @@ const materialesList = [
   { id: 'Fundición', label: 'Fundición' },
   { id: 'Fibrocemento', label: 'Fibrocemento' }
 ];
+
+onMounted(() => {
+    initMap();
+});
+
+const initMap = () => {
+    // Tomar coordenadas del pozo actual del paso 1
+    const { x, y } = inspeccionStore.inspeccionActual.coordenadas_utm;
+    if (!x || !y) {
+        console.warn('Paso 5: No hay coordenadas UTM para centrar el mapa.');
+        return;
+    }
+
+    const [utmX, utmY] = [Number(x), Number(y)];
+    const [lng, lat] = proj4(UTM_29N, WGS84, [utmX, utmY]);
+
+    map = L.map('map-connectivity', {
+        zoomControl: false,
+        attributionControl: false,
+        maxZoom: 22
+    }).setView([lat, lng], 19);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 22,
+        maxNativeZoom: 19
+    }).addTo(map);
+
+    wellsLayer = L.layerGroup().addTo(map);
+    networkLines = L.polyline([], { color: '#3b82f6', weight: 4, dashArray: '10, 10', opacity: 0.6 }).addTo(map);
+
+    // [NUEVO] Capas de Red GIS
+    cargarCapasGIS();
+
+    // Marcador Pozo Actual (Diferente estilo)
+    L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: '#ef4444',
+        color: '#fff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.9
+    }).addTo(map).bindTooltip('POZO ACTUAL', { permanent: true, direction: 'top', className: 'well-label-red' });
+
+    cargarInventario();
+
+    nextTick(() => {
+        setTimeout(() => {
+            if (map) {
+                map.invalidateSize();
+            }
+        }, 100);
+    });
+};
+
+const cargarCapasGIS = async () => {
+  if (!map) return;
+
+  const capas = [
+    { url: '/data/principales.geojson', style: { color: '#FF0000', weight: 6, opacity: 1 }, name: 'principales' },
+    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' }
+  ];
+
+  for (const capa of capas) {
+    try {
+      const resp = await fetch(capa.url);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      
+      gisLayers[capa.name] = L.geoJSON(data, {
+        style: capa.style,
+        interactive: false,
+        coordsToLatLng: (coords) => {
+          if (Math.abs(coords[0]) > 180) {
+            const [lng, lat] = proj4(UTM_29N, WGS84, [coords[0], coords[1]]);
+            return L.latLng(lat, lng);
+          }
+          return L.latLng(coords[1], coords[0]);
+        }
+      }).addTo(map);
+    } catch (e) {
+      console.warn(`Paso 5: No se pudo cargar la capa GIS ${capa.name}:`, e);
+    }
+  }
+};
+
+const wellsCoordsCache = new Map<string, L.LatLng>();
+
+const cargarInventario = async () => {
+    try {
+        const response = await fetch('/data/pozos.geojson');
+        const data = await response.json();
+
+        L.geoJSON(data, {
+            coordsToLatLng: (coords) => {
+                const [lng, lat] = proj4(UTM_29N, WGS84, [coords[0], coords[1]]);
+                return L.latLng(lat, lng);
+            },
+            pointToLayer: (feature, latlng) => {
+                const id_pozo = feature.properties.COD_CAMPO || feature.properties.ObjectId || feature.properties.id;
+                
+                // Cachear coords para dibujo de líneas
+                wellsCoordsCache.set(id_pozo, latlng);
+
+                // No pintar el pozo actual de nuevo como interactivo
+                if (id_pozo === inspeccionStore.inspeccionActual.id_pozo) return L.layerGroup();
+
+                return L.circleMarker(latlng, {
+                    radius: 5,
+                    fillColor: '#3b82f6',
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).on('click', () => {
+                    if (modoSeleccion.value === 'desde') {
+                        inspeccionStore.inspeccionActual.red_viene_de_pozo = id_pozo;
+                        modoSeleccion.value = null;
+                    } else if (modoSeleccion.value === 'hacia') {
+                        inspeccionStore.inspeccionActual.red_va_a_pozo = id_pozo;
+                        modoSeleccion.value = null;
+                    }
+                }).bindTooltip(id_pozo, { direction: 'bottom', className: 'well-label-small' });
+            }
+        }).addTo(wellsLayer!);
+
+        // Intentar dibujar línea inicial si ya existen datos
+        actualizarLineaRed();
+
+    } catch (e) {
+        console.error('Error al cargar inventario para mapa de red:', e);
+    }
+};
+
+const actualizarLineaRed = () => {
+    if (!map || !networkLines) return;
+    networkLines.setLatLngs([]);
+
+    const vD = inspeccionStore.inspeccionActual.red_viene_de_pozo;
+    const vA = inspeccionStore.inspeccionActual.red_va_a_pozo;
+    
+    // Coordenadas del pozo actual
+    const { x, y } = inspeccionStore.inspeccionActual.coordenadas_utm;
+    if (!x || !y) return;
+    const [l_curr, lat_curr] = proj4(UTM_29N, WGS84, [x, y]);
+    const p_actual = L.latLng(lat_curr, l_curr);
+
+    const points: L.LatLng[] = [];
+
+    if (vD && wellsCoordsCache.has(vD)) {
+        points.push(wellsCoordsCache.get(vD)!);
+        points.push(p_actual);
+    }
+
+    if (vA && wellsCoordsCache.has(vA)) {
+        if (points.length === 0) points.push(p_actual);
+        points.push(wellsCoordsCache.get(vA)!);
+    }
+
+    if (points.length > 1) {
+        networkLines.setLatLngs(points);
+    }
+};
+
+watch(() => [inspeccionStore.inspeccionActual.red_viene_de_pozo, inspeccionStore.inspeccionActual.red_va_a_pozo], () => {
+    actualizarLineaRed();
+});
 </script>
 
 <style scoped>
@@ -214,5 +456,31 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+}
+
+:deep(.well-label-red) {
+  background: #ef4444 !important;
+  border: 2px solid white !important;
+  color: white !important;
+  font-weight: 900 !important;
+  font-size: 8px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+:deep(.well-label-small) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 7px !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+}
+
+#map-connectivity {
+  height: 240px !important;
+  width: 100% !important;
 }
 </style>

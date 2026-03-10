@@ -13,6 +13,13 @@ export interface AcometidaData {
     profundidad_m: number;
 }
 
+export interface PozoInventario {
+    id: string; // ObjectId o identificador
+    x: number;
+    y: number;
+    properties: any;
+}
+
 export interface InspeccionLocal extends InspeccionRequest {
     // Metadatos para gestión offline
     sync_status: 'pending' | 'synced' | 'error';
@@ -65,15 +72,18 @@ export interface InspeccionRequest {
     ruta_foto_interior: string | null;
     observaciones: string;
     acometidas: AcometidaData[];
+    no_inspeccionable: boolean;
 }
 
 export class AppDB extends Dexie {
     inspecciones!: Table<InspeccionLocal>;
+    inventario_pozos!: Table<PozoInventario>;
 
     constructor() {
         super('LouroAppDB');
-        this.version(1).stores({
-            inspecciones: 'id, id_pozo, sync_status, last_modified' // Índices para búsquedas rápidas
+        this.version(2).stores({
+            inspecciones: 'id, id_pozo, sync_status, last_modified, finalizada',
+            inventario_pozos: 'id, x, y' // Índices para búsquedas espaciales si fuera necesario
         });
     }
 }

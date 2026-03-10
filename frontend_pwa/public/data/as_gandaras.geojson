@@ -1,0 +1,39 @@
+{
+    "type": "FeatureCollection",
+    "name": "as_gandaras",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Polígono As Gándaras"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -8.625,
+                            42.128
+                        ],
+                        [
+                            -8.608,
+                            42.128
+                        ],
+                        [
+                            -8.608,
+                            42.146
+                        ],
+                        [
+                            -8.625,
+                            42.146
+                        ],
+                        [
+                            -8.625,
+                            42.128
+                        ]
+                    ]
+                ]
+            }
+        }
+    ]
+}

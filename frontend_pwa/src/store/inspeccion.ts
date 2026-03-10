@@ -45,7 +45,8 @@ const getInitialState = () => ({
         estado_paso: 1,
         finalizada: false,
         ruta_foto_situacion: null as string | null,
-        ruta_foto_interior: null as string | null
+        ruta_foto_interior: null as string | null,
+        no_inspeccionable: false
     },
     fotosTemporales: {
         situacion: null as string | null,
@@ -60,26 +61,43 @@ export const useInspeccionStore = defineStore('inspeccion', {
     getters: {
         pasoActualValido(state): boolean {
             const i = state.inspeccionActual;
+            if (i.no_inspeccionable) {
+                // Si no es inspeccionable, solo requerimos datos de identificación y fotos
+                if (i.estado_paso === 1) {
+                    const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
+                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
+                }
+                if (i.estado_paso === 2) {
+                    const tieneFotos = !!(state.fotosTemporales.situacion && state.fotosTemporales.interior);
+                    return tieneFotos;
+                }
+                return true;
+            }
+
             switch (i.estado_paso) {
                 case 1:
                     const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
                     return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
                 case 2:
-                    const tapaOk = i.tapa_forma === 'Circular'
-                        ? (i.tapa_diametro_mm && i.tapa_diametro_mm > 0)
-                        : (i.tapa_largo_mm && i.tapa_largo_mm > 0 && i.tapa_ancho_mm && i.tapa_ancho_mm > 0);
-                    return !!(i.tapa_material && i.tapa_tipo && tapaOk);
+                    const tieneFotos = !!(state.fotosTemporales.situacion && state.fotosTemporales.interior);
+                    return !!(i.estado && i.limpieza && tieneFotos);
                 case 3:
-                    const dimOk = i.forma_pozo === 'Circular'
-                        ? (i.diametro_pozo_mm && i.diametro_pozo_mm > 0)
-                        : (i.largo_pozo_mm && i.largo_pozo_mm > 0 && i.ancho_pozo_mm && i.ancho_pozo_mm > 0);
-                    return !!(i.material_pozo && i.profundidad_m && i.tipo_acceso && dimOk);
+                    const tForma = i.tapa_forma || 'Circular';
+                    const tMat = i.tapa_material || 'Fundición Dúctil';
+                    const tTipo = i.tapa_tipo || 'Abatible';
+                    const tapaOk = tForma === 'Circular'
+                        ? (i.tapa_diametro_mm !== null && i.tapa_diametro_mm > 0)
+                        : (i.tapa_largo_mm !== null && i.tapa_largo_mm > 0 && i.tapa_ancho_mm !== null && i.tapa_ancho_mm > 0);
+                    return !!(tMat && tTipo && tapaOk);
                 case 4:
-                    return !!(i.estado && i.limpieza);
+                    const dimOk = i.forma_pozo === 'Circular'
+                        ? (i.diametro_pozo_mm !== null && i.diametro_pozo_mm > 0)
+                        : (i.largo_pozo_mm !== null && i.largo_pozo_mm > 0 && i.ancho_pozo_mm !== null && i.ancho_pozo_mm > 0);
+                    return !!(i.material_pozo && (i.profundidad_m !== null && i.profundidad_m >= 0) && i.tipo_acceso && dimOk);
                 case 5:
                     return !!(i.red_tipo && i.red_viene_de_pozo && i.red_va_a_pozo);
                 case 6:
-                    return true; // Acometidas son opcionales o lista dinámica
+                    return true;
                 default:
                     return false;
             }
@@ -96,7 +114,7 @@ export const useInspeccionStore = defineStore('inspeccion', {
                 const ultimo = await db.inspecciones
                     .orderBy('last_modified')
                     .reverse()
-                    .filter(i => i.finalizada === true || i.sync_status === 'synced')
+                    .filter(i => (i.finalizada === true || i.sync_status === 'synced') && !i.no_inspeccionable)
                     .first();
 
                 if (ultimo) {
