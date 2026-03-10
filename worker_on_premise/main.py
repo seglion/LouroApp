@@ -9,8 +9,8 @@ import sqlite3
 import fiona
 from typing import Optional
 
-import boto3
-from botocore.exceptions import ClientError
+from minio import Minio
+from minio.error import S3Error
 
 import geopandas as gpd
 from shapely.geometry import Point, mapping
@@ -146,13 +146,11 @@ def process_message(ch, method, properties, body):
         download_dir = os.path.join(APP_DATA_DIR, "Descargas_GIS", anio, mes, id_pozo)
         os.makedirs(download_dir, exist_ok=True)
 
-        s3_client = boto3.client(
-            's3',
-            endpoint_url=f"http{'s' if MINIO_SECURE else ''}://{MINIO_ENDPOINT}",
-            aws_access_key_id=MINIO_ACCESS_KEY,
-            aws_secret_access_key=MINIO_SECRET_KEY,
-            config=boto3.session.Config(signature_version='s3v4'),
-            region_name='us-east-1'
+        s3_client = Minio(
+            MINIO_ENDPOINT,
+            access_key=MINIO_ACCESS_KEY,
+            secret_key=MINIO_SECRET_KEY,
+            secure=MINIO_SECURE
         )
 
         urls_a_descargar = []
@@ -185,8 +183,8 @@ def process_message(ch, method, properties, body):
                 if not os.path.exists(local_path):
                     logger.info(f"⬇️ Descargando {filename} desde {bucket_name}/{object_key}...")
                     try:
-                        s3_client.download_file(bucket_name, object_key, local_path)
-                    except ClientError as e:
+                        s3_client.fget_object(bucket_name, object_key, local_path)
+                    except S3Error as e:
                         logger.error(f"Error descargando {filename} de MinIO: {e}")
                         # Propagamos excepcion para no hacer ACK y reintentar si es necesario.
                         raise

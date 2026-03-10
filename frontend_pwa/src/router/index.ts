@@ -26,14 +26,18 @@ const router = createRouter({
             meta: { requiresAuth: true },
             children: [
                 {
-                    path: '', /* default step is managed by the store, but we route here */
+                    path: 'paso-1',
                     name: 'inspeccion-paso-1',
                     component: () => import('../views/inspeccion/Paso1_General.vue')
                 },
                 {
+                    path: '',
+                    redirect: { name: 'inspeccion-paso-1' }
+                },
+                {
                     path: 'paso-2',
                     name: 'inspeccion-paso-2',
-                    component: () => import('../views/inspeccion/Paso2_Detalles.vue')
+                    component: () => import('../views/inspeccion/Paso4_EstadoEntorno.vue')
                 },
                 {
                     path: 'paso-3',
@@ -43,7 +47,7 @@ const router = createRouter({
                 {
                     path: 'paso-4',
                     name: 'inspeccion-paso-4',
-                    component: () => import('../views/inspeccion/Paso4_EstadoEntorno.vue')
+                    component: () => import('../views/inspeccion/Paso2_Detalles.vue')
                 },
                 {
                     path: 'paso-5',

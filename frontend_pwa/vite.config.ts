@@ -10,7 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,geojson}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,geojson}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024 // 10MB
       },
       manifest: {
         name: 'REGISTRO SANEAMIENTO CONSORCIO LOURO',

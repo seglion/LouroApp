@@ -13,11 +13,11 @@ const getInitialState = () => ({
         situacion: '',
         cota_tapa: null as number | null,
         profundidad_m: null as number | null,
-        material_pozo: '',
-        tipo_acceso: '',
+        material_pozo: 'Hormigón',
+        tipo_acceso: 'Ninguno',
         num_pates: 0,
         forma_pozo: 'Circular',
-        diametro_pozo_mm: null as number | null,
+        diametro_pozo_mm: 1000 as number | null,
         largo_pozo_mm: null as number | null,
         ancho_pozo_mm: null as number | null,
         resalto: 'No',
@@ -27,25 +27,26 @@ const getInitialState = () => ({
         estado: 'Bueno',
         limpieza: 'Limpio',
         observaciones: '',
-        tapa_forma: '',
-        tapa_tipo: '',
-        tapa_material: '',
-        tapa_diametro_mm: null as number | null,
+        tapa_forma: 'Circular',
+        tapa_tipo: 'Abatible',
+        tapa_material: 'Fundición Dúctil',
+        tapa_diametro_mm: 600 as number | null,
         tapa_largo_mm: null as number | null,
         tapa_ancho_mm: null as number | null,
         red_tipo: 'Unitario',
         red_viene_de_pozo: '',
         red_va_a_pozo: '',
         red_carga: 'Media',
-        colector_mat_entrada: '',
+        colector_mat_entrada: 'PVC',
         colector_diametro_entrada_mm: null as number | null,
-        colector_mat_salida: '',
+        colector_mat_salida: 'PVC',
         colector_diametro_salida_mm: null as number | null,
         acometidas: [] as any[],
         estado_paso: 1,
         finalizada: false,
         ruta_foto_situacion: null as string | null,
-        ruta_foto_interior: null as string | null
+        ruta_foto_interior: null as string | null,
+        no_inspeccionable: false
     },
     fotosTemporales: {
         situacion: null as string | null,
@@ -60,25 +61,43 @@ export const useInspeccionStore = defineStore('inspeccion', {
     getters: {
         pasoActualValido(state): boolean {
             const i = state.inspeccionActual;
+            if (i.no_inspeccionable) {
+                // Si no es inspeccionable, solo requerimos datos de identificación y fotos
+                if (i.estado_paso === 1) {
+                    const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
+                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
+                }
+                if (i.estado_paso === 2) {
+                    const tieneFotos = !!(state.fotosTemporales.situacion && state.fotosTemporales.interior);
+                    return tieneFotos;
+                }
+                return true;
+            }
+
             switch (i.estado_paso) {
                 case 1:
-                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y);
+                    const cotaValida = i.cota_tapa !== null && i.cota_tapa !== undefined && i.cota_tapa.toString() !== '';
+                    return !!(i.id_pozo && i.situacion && i.fecha_inspec && i.coordenadas_utm.x && i.coordenadas_utm.y && cotaValida);
                 case 2:
-                    const dimOk = i.forma_pozo === 'Circular'
-                        ? (i.diametro_pozo_mm && i.diametro_pozo_mm > 0)
-                        : (i.largo_pozo_mm && i.largo_pozo_mm > 0 && i.ancho_pozo_mm && i.ancho_pozo_mm > 0);
-                    return !!(i.material_pozo && i.profundidad_m && i.tipo_acceso && dimOk);
+                    const tieneFotos = !!(state.fotosTemporales.situacion && state.fotosTemporales.interior);
+                    return !!(i.estado && i.limpieza && tieneFotos);
                 case 3:
-                    const tapaOk = i.tapa_forma === 'Circular'
-                        ? (i.tapa_diametro_mm && i.tapa_diametro_mm > 0)
-                        : (i.tapa_largo_mm && i.tapa_largo_mm > 0 && i.tapa_ancho_mm && i.tapa_ancho_mm > 0);
-                    return !!(i.tapa_material && i.tapa_tipo && tapaOk);
+                    const tForma = i.tapa_forma || 'Circular';
+                    const tMat = i.tapa_material || 'Fundición Dúctil';
+                    const tTipo = i.tapa_tipo || 'Abatible';
+                    const tapaOk = tForma === 'Circular'
+                        ? (i.tapa_diametro_mm !== null && i.tapa_diametro_mm > 0)
+                        : (i.tapa_largo_mm !== null && i.tapa_largo_mm > 0 && i.tapa_ancho_mm !== null && i.tapa_ancho_mm > 0);
+                    return !!(tMat && tTipo && tapaOk);
                 case 4:
-                    return !!(i.estado && i.limpieza);
+                    const dimOk = i.forma_pozo === 'Circular'
+                        ? (i.diametro_pozo_mm !== null && i.diametro_pozo_mm > 0)
+                        : (i.largo_pozo_mm !== null && i.largo_pozo_mm > 0 && i.ancho_pozo_mm !== null && i.ancho_pozo_mm > 0);
+                    return !!(i.material_pozo && (i.profundidad_m !== null && i.profundidad_m >= 0) && i.tipo_acceso && dimOk);
                 case 5:
                     return !!(i.red_tipo && i.red_viene_de_pozo && i.red_va_a_pozo);
                 case 6:
-                    return true; // Acometidas son opcionales o lista dinámica
+                    return true;
                 default:
                     return false;
             }
@@ -86,9 +105,43 @@ export const useInspeccionStore = defineStore('inspeccion', {
     },
     actions: {
         async iniciarNuevaInspeccion() {
-            // Reset completo del estado
+            // Reset inicial
             const initialState = getInitialState();
             Object.assign(this.$state, initialState);
+
+            try {
+                // Buscar el último pozo finalizado o sincronizado para heredar datos
+                const ultimo = await db.inspecciones
+                    .orderBy('last_modified')
+                    .reverse()
+                    .filter(i => (i.finalizada === true || i.sync_status === 'synced') && !i.no_inspeccionable)
+                    .first();
+
+                if (ultimo) {
+                    console.log('Heredando datos del pozo anterior:', ultimo.id_pozo);
+                    this.inspeccionActual.situacion = ultimo.situacion || '';
+                    this.inspeccionActual.tapa_forma = ultimo.tapa_forma || 'Circular';
+                    this.inspeccionActual.tapa_diametro_mm = ultimo.tapa_diametro_mm || 600;
+                    this.inspeccionActual.tapa_material = ultimo.tapa_material || 'Fundición Dúctil';
+                    this.inspeccionActual.tapa_tipo = ultimo.tapa_tipo || 'Abatible';
+
+                    // Herencia Paso 3: Detalles del Pozo
+                    this.inspeccionActual.forma_pozo = ultimo.forma_pozo || 'Circular';
+                    this.inspeccionActual.material_pozo = ultimo.material_pozo || 'Hormigón';
+                    this.inspeccionActual.diametro_pozo_mm = ultimo.diametro_pozo_mm || 1000;
+                    this.inspeccionActual.largo_pozo_mm = ultimo.largo_pozo_mm || null;
+                    this.inspeccionActual.ancho_pozo_mm = ultimo.ancho_pozo_mm || null;
+                    this.inspeccionActual.tipo_acceso = ultimo.tipo_acceso || 'Ninguno';
+
+                    // Herencia Paso 5: Red y Colector
+                    this.inspeccionActual.colector_mat_entrada = ultimo.colector_mat_entrada || 'PVC';
+                    this.inspeccionActual.colector_diametro_entrada_mm = ultimo.colector_diametro_entrada_mm || null;
+                    this.inspeccionActual.colector_mat_salida = ultimo.colector_mat_salida || 'PVC';
+                    this.inspeccionActual.colector_diametro_salida_mm = ultimo.colector_diametro_salida_mm || null;
+                }
+            } catch (error) {
+                console.warn('No se pudo recuperar datos de herencia, usando valores por defecto:', error);
+            }
 
             this.inspeccionActual.id = uuidv7();
             const datePart = new Date().toISOString().split('T')[0];
@@ -124,7 +177,20 @@ export const useInspeccionStore = defineStore('inspeccion', {
             if (data) {
                 // Separar metadatos de IndexedDB de los datos de la inspección
                 const { sync_status, last_modified, blob_foto_situacion, blob_foto_interior, ...datosInspeccion } = data;
-                this.inspeccionActual = datosInspeccion;
+
+                // Mezclar con el estado inicial para rellenar campos vacíos en borradores antiguos
+                const defaults = getInitialState().inspeccionActual;
+                this.inspeccionActual = {
+                    ...defaults,
+                    ...datosInspeccion,
+                    // Asegurar que si los strings están vacíos pero tienen default, se usen los defaults
+                    colector_mat_entrada: datosInspeccion.colector_mat_entrada || defaults.colector_mat_entrada,
+                    colector_mat_salida: datosInspeccion.colector_mat_salida || defaults.colector_mat_salida,
+                    material_pozo: datosInspeccion.material_pozo || defaults.material_pozo,
+                    tapa_material: datosInspeccion.tapa_material || defaults.tapa_material,
+                    tapa_forma: datosInspeccion.tapa_forma || defaults.tapa_forma,
+                    tapa_tipo: datosInspeccion.tapa_tipo || defaults.tapa_tipo
+                };
 
                 // Reconstruir URLs temporales si hay blobs persistidos
                 if (blob_foto_situacion) {
@@ -147,7 +213,20 @@ export const useInspeccionStore = defineStore('inspeccion', {
 
                 if (ultimo && ultimo.sync_status === 'pending') {
                     const { sync_status, last_modified, ...datos } = ultimo;
-                    this.inspeccionActual = datos;
+
+                    // Aplicar defaults a campos vacíos
+                    const defaults = getInitialState().inspeccionActual;
+                    this.inspeccionActual = {
+                        ...defaults,
+                        ...datos,
+                        colector_mat_entrada: datos.colector_mat_entrada || defaults.colector_mat_entrada,
+                        colector_mat_salida: datos.colector_mat_salida || defaults.colector_mat_salida,
+                        material_pozo: datos.material_pozo || defaults.material_pozo,
+                        tapa_material: datos.tapa_material || defaults.tapa_material,
+                        tapa_forma: datos.tapa_forma || defaults.tapa_forma,
+                        tapa_tipo: datos.tapa_tipo || defaults.tapa_tipo
+                    };
+
                     console.log('Sesión recuperada automáticamente:', ultimo.id);
                     return true;
                 }

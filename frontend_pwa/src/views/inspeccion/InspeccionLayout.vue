@@ -8,7 +8,7 @@
             <span class="material-symbols-outlined">close</span>
           </button>
           <div class="flex flex-col items-center">
-            <span class="text-xs font-bold uppercase tracking-widest text-primary/60">Paso {{ inspeccionStore.inspeccionActual.estado_paso }} de 6</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-primary/60">Paso {{ inspeccionStore.inspeccionActual.estado_paso }} de {{ totalPasos }}</span>
             <h1 class="text-base font-bold text-primary dark:text-white">{{ getTituloPaso }}</h1>
           </div>
           <div class="w-10"></div>
@@ -17,7 +17,7 @@
         <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800">
           <div 
             class="h-full bg-accent-blue transition-all duration-500 ease-out"
-            :style="{ width: `${(inspeccionStore.inspeccionActual.estado_paso / 6) * 100}%` }"
+            :style="{ width: `${(inspeccionStore.inspeccionActual.estado_paso / totalPasos) * 100}%` }"
           ></div>
         </div>
       </header>
@@ -47,17 +47,17 @@
             :disabled="!inspeccionStore.pasoActualValido"
             :class="[
               'flex-1 h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-widest transition-all active:scale-[0.98] group shadow-lg',
-              inspeccionStore.inspeccionActual.estado_paso === 6 
+              esUltimoPaso 
                 ? 'bg-green-600 dark:bg-green-500 text-white' 
                 : 'bg-primary dark:bg-accent-blue text-white dark:text-primary disabled:opacity-50 disabled:grayscale'
             ]"
           >
             <div class="flex flex-col items-start gap-0.5 text-left">
-              <span class="text-[10px] font-bold opacity-60">{{ inspeccionStore.inspeccionActual.estado_paso === 6 ? 'Finalizar' : 'Siguiente' }}</span>
+              <span class="text-[10px] font-bold opacity-60">{{ esUltimoPaso ? 'Finalizar' : 'Siguiente' }}</span>
               <span class="text-sm">{{ getLabelBotonSiguiente }}</span>
             </div>
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors">
-              <span class="material-symbols-outlined">{{ inspeccionStore.inspeccionActual.estado_paso === 6 ? 'task_alt' : 'arrow_forward' }}</span>
+              <span class="material-symbols-outlined">{{ esUltimoPaso ? 'task_alt' : 'arrow_forward' }}</span>
             </div>
           </button>
         </div>
@@ -77,17 +77,17 @@ const inspeccionStore = useInspeccionStore();
 
 const titulos = [
     "Ubicación y General",
-    "Detalles del Pozo",
-    "Detalles de la Tapa",
     "Estado y Entorno",
+    "Detalles de la Tapa",
+    "Detalles del Pozo",
     "Red y Colector",
     "Acometidas domiciliarias"
 ];
 
 const labelsBotones = [
-    "Ir a Detalles",
-    "Ir a Tapa",
     "Ir a Estado",
+    "Ir a Tapa",
+    "Ir a Detalles Pozo",
     "Ir a Red",
     "Ir a Acometidas",
     "Completar Registro"
@@ -95,11 +95,11 @@ const labelsBotones = [
 
 const sincronizarPaso = (routeName: string | symbol | null | undefined) => {
     if (!routeName) return;
-    const stepMatch = String(routeName).match(/paso-(\d+)/);
+    const nameStr = String(routeName);
+    const stepMatch = nameStr.match(/paso-(\d+)/);
+    
     if (stepMatch && stepMatch[1]) {
         inspeccionStore.inspeccionActual.estado_paso = parseInt(stepMatch[1]);
-    } else if (routeName === 'nueva_inspeccion' || routeName === 'inspeccion-paso-1') {
-        inspeccionStore.inspeccionActual.estado_paso = 1;
     }
 };
 
@@ -108,8 +108,10 @@ onMounted(async () => {
         const recuperado = await inspeccionStore.recuperarUltimoBorrador();
         if (recuperado) {
             sincronizarPaso(route.name);
-            if (route.name === 'inspeccion-paso-1' && inspeccionStore.inspeccionActual.estado_paso > 1) {
-                router.replace(`/nueva-inspeccion/paso-${inspeccionStore.inspeccionActual.estado_paso}`);
+            // Si la ruta actual no coincide con el paso del store, redirigir
+            const expectedName = `inspeccion-paso-${inspeccionStore.inspeccionActual.estado_paso}`;
+            if (route.name !== expectedName) {
+                router.replace({ name: expectedName });
             }
         }
     }
@@ -131,16 +133,16 @@ const volverAlDashboard = () => router.push('/');
 const retroceder = () => {
     if (inspeccionStore.inspeccionActual.estado_paso > 1) {
         inspeccionStore.retrocederPaso();
-        router.push(`/nueva-inspeccion/paso-${inspeccionStore.inspeccionActual.estado_paso}`);
+        router.push({ name: `inspeccion-paso-${inspeccionStore.inspeccionActual.estado_paso}` });
     }
 };
 
 const avanzar = () => {
-    if (inspeccionStore.inspeccionActual.estado_paso === 6) {
+    if (esUltimoPaso.value) {
         finalizar();
     } else if (inspeccionStore.pasoActualValido) {
         inspeccionStore.avanzarPaso();
-        router.push(`/nueva-inspeccion/paso-${inspeccionStore.inspeccionActual.estado_paso}`);
+        router.push({ name: `inspeccion-paso-${inspeccionStore.inspeccionActual.estado_paso}` });
     }
 };
 
@@ -151,6 +153,12 @@ const finalizar = async () => {
     router.push('/');
 };
 
+const totalPasos = computed(() => inspeccionStore.inspeccionActual.no_inspeccionable ? 3 : 6);
+const esUltimoPaso = computed(() => inspeccionStore.inspeccionActual.estado_paso === totalPasos.value);
+
 const getTituloPaso = computed(() => titulos[inspeccionStore.inspeccionActual.estado_paso - 1] || "Inspección");
-const getLabelBotonSiguiente = computed(() => labelsBotones[inspeccionStore.inspeccionActual.estado_paso - 1] || "Continuar");
+const getLabelBotonSiguiente = computed(() => {
+    if (esUltimoPaso.value) return "Completar Registro";
+    return labelsBotones[inspeccionStore.inspeccionActual.estado_paso - 1] || "Continuar";
+});
 </script>
