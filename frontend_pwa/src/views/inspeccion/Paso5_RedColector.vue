@@ -295,6 +295,7 @@ const initMap = () => {
         preferCanvas: true
     }).setView([lat, lng], 19);
 
+
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri',
         maxZoom: 22,
@@ -302,7 +303,7 @@ const initMap = () => {
     }).addTo(map);
 
     wellsLayer = L.layerGroup().addTo(map);
-    networkLines = L.polyline([], { color: '#3b82f6', weight: 4, dashArray: '10, 10', opacity: 0.6 }).addTo(map);
+    networkLines = L.polyline([], { color: '#3b82f6', weight: 8, dashArray: '12, 12', opacity: 0.8 }).addTo(map);
     gisLayerGroup = L.layerGroup().addTo(map);
 
     // [NUEVO] Capas de Red GIS
@@ -370,6 +371,7 @@ const cargarCapasGIS = async () => {
   }
 };
 
+
 const wellsCoordsCache = new Map<string, L.LatLng>();
 
 const cargarInventario = async () => {
@@ -403,10 +405,10 @@ const cargarInventario = async () => {
             if (id_pozo === inspeccionStore.inspeccionActual.id_pozo) return;
 
             L.circleMarker(latlng, {
-                radius: 6,
+                radius: 14, // Aumentado para facilitar toque en campo
                 fillColor: '#3b82f6',
                 color: '#fff',
-                weight: 2,
+                weight: 3,
                 opacity: 1,
                 fillOpacity: 0.8
             }).addTo(wellsLayer!)

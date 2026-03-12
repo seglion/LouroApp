@@ -270,6 +270,7 @@ onMounted(() => {
     preferCanvas: true
   }).setView([lat, lng], 18);
 
+
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'Tiles &copy; Esri',
     maxZoom: 22,
@@ -419,21 +420,21 @@ const actualizarMarcador = () => {
           icon: L.divIcon({
             className: 'custom-user-marker',
             html: `<div class="radar-pulse"></div><div class="inner-dot"></div>`,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [50, 50], // Aumentado
+            iconAnchor: [25, 25] // Ajustado al centro
           })
         }).addTo(map);
 
         // 2. Actualizar Radar (40m)
         if (radarCircle) map.removeLayer(radarCircle);
         radarCircle = L.circle(coords, {
-          radius: 40,
-          color: '#FACC15', // Amarillo para contraste
-          fillColor: '#FACC15',
-          fillOpacity: 0.1,
-          weight: 1.5,
-          dashArray: '5, 5',
-          interactive: false
+            radius: 40,
+            color: '#FACC15',
+            fillColor: '#FACC15',
+            fillOpacity: 0.15,
+            weight: 3, // Más visible
+            dashArray: '8, 8',
+            interactive: false
         }).addTo(map);
 
         // 3. Filtrar y Dibujar Pozos cercanos
@@ -523,6 +524,7 @@ const cargarCapasGIS = async () => {
   }
 };
 
+
 const actualizarPozosCercanos = async (userX: number, userY: number) => {
   if (!nearbyWellsLayer || !map) return;
   nearbyWellsLayer.clearLayers();
@@ -552,8 +554,8 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
       icon: L.divIcon({
         className: `well-marker-radar ${isSelected ? 'is-selected' : ''}`,
         html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10]
+        iconSize: [40, 40], // Aumentado para facilitar toque
+        iconAnchor: [20, 20]
       })
     });
 
