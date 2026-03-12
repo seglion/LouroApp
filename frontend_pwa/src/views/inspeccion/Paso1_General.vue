@@ -554,8 +554,8 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
       icon: L.divIcon({
         className: `well-marker-radar ${isSelected ? 'is-selected' : ''}`,
         html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
-        iconSize: [40, 40], // Aumentado para facilitar toque
-        iconAnchor: [20, 20]
+        iconSize: [40, 40], // Tamaño gigante para campo
+        iconAnchor: [30, 30]
       })
     });
 
@@ -651,18 +651,18 @@ input[type=number] {
   justify-content: center;
 }
 :deep(.inner-dot) {
-  width: 12px;
-  height: 12px;
+  width: 40px; 
+  height: 40px;
   background: #3b82f6;
-  border: 2px solid white;
+  border: 5px solid white;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
   z-index: 2;
 }
 :deep(.radar-pulse) {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 60px; 
+  height: 60px;
   background: rgba(59, 130, 246, 0.2);
   border-radius: 50%;
   animation: pulse 2s infinite;
@@ -680,10 +680,10 @@ input[type=number] {
   align-items: center;
 }
 :deep(.well-dot) {
-  width: 10px;
-  height: 10px;
+  width: 45px; 
+  height: 45px;
   background: white;
-  border: 2px solid #363842;
+  border: 5px solid #363842;
   border-radius: 50%;
   transition: all 0.2s;
 }
@@ -693,7 +693,7 @@ input[type=number] {
 }
 :deep(.well-label) {
   position: absolute;
-  top: 18px;
+  top: 50px; 
   background: #000000;
   color: #FFFFFF;
   font-size: 11px;

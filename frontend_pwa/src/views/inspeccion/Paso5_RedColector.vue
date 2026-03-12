@@ -405,12 +405,12 @@ const cargarInventario = async () => {
             if (id_pozo === inspeccionStore.inspeccionActual.id_pozo) return;
 
             L.circleMarker(latlng, {
-                radius: 14, // Aumentado para facilitar toque en campo
+                radius: 30, // Gigante para campo (60px de diámetro térmico)
                 fillColor: '#3b82f6',
                 color: '#fff',
-                weight: 3,
+                weight: 6,
                 opacity: 1,
-                fillOpacity: 0.8
+                fillOpacity: 0.9
             }).addTo(wellsLayer!)
             .on('click', () => {
                 if (modoSeleccion.value === 'desde') {
