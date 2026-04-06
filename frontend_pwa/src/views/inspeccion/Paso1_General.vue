@@ -15,7 +15,7 @@
       <div class="absolute bottom-4 left-4 z-10 px-3 py-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2">
         <div class="flex h-2 w-2 rounded-full" :class="coordenadasListas ? 'bg-green-500' : 'bg-amber-500 animate-pulse'"></div>
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
-          {{ coordenadasListas ? `Radar: 40m | GPS: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
+          {{ coordenadasListas ? `Radar: 100m | GPS: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
         </span>
       </div>
     </div>
@@ -61,14 +61,14 @@
                   <span class="text-sm font-black text-slate-700 dark:text-slate-300 group-hover:text-accent-blue">{{ id }}</span>
                 </div>
                 <span v-if="inspeccionStore.inspeccionActual.id_pozo === id" class="material-symbols-outlined text-accent-blue text-sm">check_circle</span>
-                <span v-else class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">A 40m</span>
+                <span v-else class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">A 100m</span>
               </div>
             </div>
           </div>
           
           <!-- Sugerencias del Radar (Carrusel Lateral) -->
           <div v-if="pozosDetectadosIds.length > 0" class="flex flex-col gap-2 animate-in overflow-hidden">
-            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (40m)</span>
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (100m)</span>
             <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 px-1 scrollbar-hide snap-x">
               <button 
                 v-for="id in pozosDetectadosIds" 
@@ -168,7 +168,7 @@
         <!-- Coordenadas UTM Section -->
         <div class="sm:col-span-2 pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
           <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Georreferenciación y Cota (Huso 29N)</label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+          <div class="grid grid-cols-1 gap-4">
             <div class="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
               <span class="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2">Coordenada X (Easting)</span>
               <input 
@@ -425,10 +425,10 @@ const actualizarMarcador = () => {
           })
         }).addTo(map);
 
-        // 2. Actualizar Radar (40m)
+        // 2. Actualizar Radar (100m)
         if (radarCircle) map.removeLayer(radarCircle);
         radarCircle = L.circle(coords, {
-            radius: 40,
+            radius: 100,
             color: '#FACC15',
             fillColor: '#FACC15',
             fillOpacity: 0.15,
@@ -529,7 +529,7 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
   if (!nearbyWellsLayer || !map) return;
   nearbyWellsLayer.clearLayers();
   
-  const radioBusqueda = 40;
+  const radioBusqueda = 100;
 
   // Búsqueda espacial optimizada: Filtramos primero por Bounding Box cuadrado 
   // antes de calcular la distancia euclídea exacta

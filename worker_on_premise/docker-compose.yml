@@ -20,7 +20,7 @@ services:
       - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - APP_DATA_DIR=/app/data
       - DB_DIR=/app/db
-      - HOST_DATA_PATH=//Sv-dc/10 produccion$/T2025/T2025-45-L02-PERTE_LOURO/03_TRABAJOS_CAMPO_A013/03_SERVIDOR_WEB/01_WORKER_ON_PROMISE
+      - HOST_DATA_PATH=//Sv-dc/10 produccion$/T2025/T2025-45-L02-PERTE_LOURO/A013_TRABAJOS_CAMPO/03_SERVIDOR_WEB/01_WORKER_ON_PROMISE
     volumes:
       - worker_data:/app/data
       - worker_db:/app/db
