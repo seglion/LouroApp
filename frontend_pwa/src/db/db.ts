@@ -29,6 +29,7 @@ export interface InspeccionLocal extends InspeccionRequest {
     // Blobs para persistencia offline real de imágenes
     blob_foto_situacion?: Blob | null;
     blob_foto_interior?: Blob | null;
+    blob_foto_esquema?: Blob | null;
 }
 
 // Interfaz basada en OpenAPI
@@ -61,15 +62,22 @@ export interface InspeccionRequest {
     tapa_largo_mm: number | null;
     tapa_ancho_mm: number | null;
     red_tipo: string;
-    red_viene_de_pozo: string;
-    red_va_a_pozo: string;
+    red_viene_de_pozo: string | null;
+    red_va_a_pozo: string | null;
+    red_viene_de_pozo_2: string | null;
+    red_va_a_pozo_2: string | null;
     red_carga: string;
-    colector_mat_entrada: string;
+    colector_mat_entrada: string | null;
     colector_diametro_entrada_mm: number | null;
-    colector_mat_salida: string;
+    colector_mat_salida: string | null;
     colector_diametro_salida_mm: number | null;
+    colector_mat_entrada_2: string | null;
+    colector_diametro_entrada_mm_2: number | null;
+    colector_mat_salida_2: string | null;
+    colector_diametro_salida_mm_2: number | null;
     ruta_foto_situacion: string | null;
     ruta_foto_interior: string | null;
+    ruta_foto_esquema: string | null;
     observaciones: string;
     acometidas: AcometidaData[];
     no_inspeccionable: boolean;
@@ -81,7 +89,7 @@ export class AppDB extends Dexie {
 
     constructor() {
         super('LouroAppDB');
-        this.version(2).stores({
+        this.version(3).stores({
             inspecciones: 'id, id_pozo, sync_status, last_modified, finalizada',
             inventario_pozos: 'id, x, y' // Índices para búsquedas espaciales si fuera necesario
         });

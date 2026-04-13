@@ -121,6 +121,28 @@
                 </template>
               </div>
             </div>
+
+            <!-- Foto de Esquema (GIS) -->
+            <div class="flex flex-col gap-3">
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Esquema / Croquis (Cambios GIS)</span>
+              <div 
+                @click="capturarFoto('esquema')"
+                class="relative aspect-video w-full rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-accent-blue/40 transition-all group overflow-hidden shadow-sm"
+              >
+                <template v-if="inspeccionStore.fotosTemporales.esquema">
+                  <img :src="inspeccionStore.fotosTemporales.esquema" class="absolute inset-0 w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                    <span class="material-symbols-outlined text-white text-4xl">add_a_photo</span>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="h-16 w-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-accent-blue transition-colors text-3xl">draw</span>
+                  </div>
+                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capturar Esquema</span>
+                </template>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -148,9 +170,9 @@ import { useInspeccionStore } from '@/store/inspeccion';
 const inspeccionStore = useInspeccionStore();
 // const router = useRouter(); // No Longer needed for navigation here
 const fotoInput = ref<HTMLInputElement | null>(null);
-const currentFotoType = ref<'situacion' | 'interior' | null>(null);
+const currentFotoType = ref<'situacion' | 'interior' | 'esquema' | null>(null);
 
-const capturarFoto = (type: 'situacion' | 'interior') => {
+const capturarFoto = (type: 'situacion' | 'interior' | 'esquema') => {
   currentFotoType.value = type;
   fotoInput.value?.click();
 };
@@ -164,8 +186,10 @@ const handleFotoChange = async (e: Event) => {
     // Guardar el Blob real para la persistencia offline e integración con Sync
     if (currentFotoType.value === 'situacion') {
       inspeccionStore.fotosTemporales.blob_situacion = file;
-    } else {
+    } else if (currentFotoType.value === 'interior') {
       inspeccionStore.fotosTemporales.blob_interior = file;
+    } else if (currentFotoType.value === 'esquema') {
+      inspeccionStore.fotosTemporales.blob_esquema = file;
     }
 
     // Disparar guardado inmediato para persistir el binario en IndexedDB

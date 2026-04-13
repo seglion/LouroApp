@@ -17,7 +17,7 @@
               <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
             </div>
             
-            <!-- Origen y Destino -->
+            <!-- Origen y Destino 1 -->
             <div class="grid grid-cols-2 gap-6">
               <div class="flex flex-col gap-3">
                 <label for="red_viene_de" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Viene de Pozo (ID)</label>
@@ -27,7 +27,7 @@
                     id="red_viene_de" 
                     v-model="inspeccionStore.inspeccionActual.red_viene_de_pozo"
                     type="text" 
-                    placeholder="P-XXXX"
+                    placeholder="P-0000"
                     class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none uppercase"
                   />
                 </div>
@@ -40,6 +40,38 @@
                     id="red_va_a" 
                     v-model="inspeccionStore.inspeccionActual.red_va_a_pozo"
                     type="text" 
+                    placeholder="P-0000"
+                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Origen y Destino 2 -->
+            <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo_2 || inspeccionStore.inspeccionActual.red_va_a_pozo_2 || modoSeleccion === 'desde2' || modoSeleccion === 'hacia2'"
+                 class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-200 dark:border-slate-800 border-dashed animate-in fade-in"
+            >
+              <div class="flex flex-col gap-3">
+                <label for="red_viene_de_2" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Viene de Pozo 2 (ID)</label>
+                <div class="relative group">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors z-10">login</span>
+                  <input 
+                    id="red_viene_de_2" 
+                    v-model="inspeccionStore.inspeccionActual.red_viene_de_pozo_2"
+                    type="text" 
+                    placeholder="P-XXXX"
+                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none uppercase"
+                  />
+                </div>
+              </div>
+              <div class="flex flex-col gap-3">
+                <label for="red_va_a_2" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Va a Pozo 2 (ID)</label>
+                <div class="relative group">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue transition-colors z-10">logout</span>
+                  <input 
+                    id="red_va_a_2" 
+                    v-model="inspeccionStore.inspeccionActual.red_va_a_pozo_2"
+                    type="text" 
                     placeholder="P-YYYY"
                     class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none uppercase"
                   />
@@ -49,23 +81,39 @@
 
             <!-- Mapa de Conectividad Interactiva -->
             <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Mapa de Conectividad</label>
-                <div class="flex gap-2">
-                  <button 
-                    @click="modoSeleccion = 'desde'"
-                    :class="modoSeleccion === 'desde' ? 'bg-green-600 text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
-                    class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
-                  >
-                    <span class="material-symbols-outlined text-xs">login</span> Origen
-                  </button>
-                  <button 
-                    @click="modoSeleccion = 'hacia'"
-                    :class="modoSeleccion === 'hacia' ? 'bg-accent-blue text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
-                    class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
-                  >
-                    <span class="material-symbols-outlined text-xs">logout</span> Destino
-                  </button>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Mapa de Conectividad</label>
+                  <div class="flex flex-wrap gap-2 justify-end">
+                    <button 
+                      @click="modoSeleccion = 'desde'"
+                      :class="modoSeleccion === 'desde' ? 'bg-green-600 text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                      class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-xs">login</span> Org1
+                    </button>
+                    <button 
+                      @click="modoSeleccion = 'hacia'"
+                      :class="modoSeleccion === 'hacia' ? 'bg-accent-blue text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                      class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-xs">logout</span> Dest1
+                    </button>
+                    <button 
+                      @click="modoSeleccion = 'desde2'"
+                      :class="modoSeleccion === 'desde2' ? 'bg-emerald-600 text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                      class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-xs">login</span> Org2
+                    </button>
+                    <button 
+                      @click="modoSeleccion = 'hacia2'"
+                      :class="modoSeleccion === 'hacia2' ? 'bg-indigo-600 text-white shadow-lg scale-105' : 'bg-slate-200 dark:bg-slate-800 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-700'"
+                      class="px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-1"
+                    >
+                      <span class="material-symbols-outlined text-xs">logout</span> Dest2
+                    </button>
+                  </div>
                 </div>
               </div>
               
@@ -79,21 +127,29 @@
                 <!-- Overlay de modo -->
                 <div v-if="modoSeleccion" class="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur border border-slate-200 dark:border-slate-800 rounded-full shadow-2xl z-[1000] pointer-events-none animate-bounce flex items-center gap-2">
                   <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="modoSeleccion === 'desde' ? 'bg-green-400' : 'bg-accent-blue'"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2" :class="modoSeleccion === 'desde' ? 'bg-green-500' : 'bg-accent-blue'"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" :class="modoSeleccion.includes('desde') ? 'bg-green-400' : 'bg-accent-blue'"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2" :class="modoSeleccion.includes('desde') ? 'bg-green-500' : 'bg-accent-blue'"></span>
                   </span>
-                  <span class="text-[9px] font-black uppercase tracking-widest" :class="modoSeleccion === 'desde' ? 'text-green-600' : 'text-accent-blue'">
-                    Clic en pozo para: {{ modoSeleccion === 'desde' ? 'ORIGEN' : 'DESTINO' }}
+                  <span class="text-[9px] font-black uppercase tracking-widest" :class="modoSeleccion.includes('desde') ? 'text-green-600' : 'text-accent-blue'">
+                    Clic en pozo para: {{ modoSeleccion.includes('desde') ? (modoSeleccion === 'desde' ? 'ORIGEN 1' : 'ORIGEN 2') : (modoSeleccion === 'hacia' ? 'DESTINO 1' : 'DESTINO 2') }}
                   </span>
                 </div>
               </div>
 
               <!-- Indicador de sentido -->
-              <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo && inspeccionStore.inspeccionActual.red_va_a_pozo" 
-                   class="flex items-center justify-center gap-4 py-2 bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_viene_de_pozo }}</span>
-                <span class="material-symbols-outlined text-slate-400 text-sm">trending_flat</span>
-                <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_va_a_pozo }}</span>
+              <div class="flex flex-col gap-2">
+                <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo || inspeccionStore.inspeccionActual.red_va_a_pozo" 
+                    class="flex items-center justify-center gap-4 py-2 bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_viene_de_pozo || '?' }}</span>
+                  <span class="material-symbols-outlined text-slate-400 text-sm">trending_flat</span>
+                  <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_va_a_pozo || '?' }}</span>
+                </div>
+                <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo_2 || inspeccionStore.inspeccionActual.red_va_a_pozo_2" 
+                    class="flex items-center justify-center gap-4 py-2 bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_viene_de_pozo_2 || '?' }}</span>
+                  <span class="material-symbols-outlined text-slate-400 text-sm">trending_flat</span>
+                  <span class="text-[10px] font-mono font-bold text-slate-500">{{ inspeccionStore.inspeccionActual.red_va_a_pozo_2 || '?' }}</span>
+                </div>
               </div>
             </div>
 
@@ -143,82 +199,173 @@
           </div>
           
           <div class="space-y-8">
-            <!-- Colector Entrada -->
-            <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
-              <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-              <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-green-600">login</span>
+            <!-- Grupo 1 (Siempre Visible) -->
+            <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <!-- Colector Entrada 1 -->
+              <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600">login</span>
+                  </div>
+                  <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Entrada 1</span>
                 </div>
-                <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Entrada</span>
-              </div>
 
-              <div class="grid grid-cols-2 gap-6">
-                <div class="flex flex-col gap-3 col-span-2">
-                  <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Entrada</label>
-                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
-                    <button 
-                      v-for="m in materialesList" 
-                      :key="m.id"
-                      @click="inspeccionStore.inspeccionActual.colector_mat_entrada = m.id"
-                      :class="inspeccionStore.inspeccionActual.colector_mat_entrada === m.id 
-                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-                      class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
-                    >
-                      {{ m.label }}
-                    </button>
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Entrada</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                      <button 
+                        v-for="m in materialesList" 
+                        :key="m.id"
+                        @click="inspeccionStore.inspeccionActual.colector_mat_entrada = m.id"
+                        :class="inspeccionStore.inspeccionActual.colector_mat_entrada === m.id 
+                          ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                        class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
+                      >
+                        {{ m.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label for="diam_entrada" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Entrada (mm)</label>
+                    <input 
+                      id="diam_entrada" 
+                      v-model.number="inspeccionStore.inspeccionActual.colector_diametro_entrada_mm"
+                      type="number" 
+                      placeholder="Ej. 300"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
+                    />
                   </div>
                 </div>
-                <div class="flex flex-col gap-3 col-span-2">
-                  <label for="diam_entrada" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Entrada (mm)</label>
-                  <input 
-                    id="diam_entrada" 
-                    v-model.number="inspeccionStore.inspeccionActual.colector_diametro_entrada_mm"
-                    type="number" 
-                    placeholder="Ej. 300"
-                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
-                  />
+              </div>
+
+              <!-- Colector Salida 1 -->
+              <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-accent-blue"></div>
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-accent-blue/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-accent-blue">logout</span>
+                  </div>
+                  <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Salida 1</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Salida</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                      <button 
+                        v-for="m in materialesList" 
+                        :key="m.id"
+                        @click="inspeccionStore.inspeccionActual.colector_mat_salida = m.id"
+                        :class="inspeccionStore.inspeccionActual.colector_mat_salida === m.id 
+                          ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                        class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
+                      >
+                        {{ m.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label for="diam_salida" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Salida (mm)</label>
+                    <input 
+                      id="diam_salida" 
+                      v-model.number="inspeccionStore.inspeccionActual.colector_diametro_salida_mm"
+                      type="number" 
+                      placeholder="Ej. 300"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Colector Salida -->
-            <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
-              <div class="absolute top-0 left-0 w-1 h-full bg-accent-blue"></div>
-              <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-accent-blue/10 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-accent-blue">logout</span>
-                </div>
-                <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Salida</span>
+            <!-- Grupo 2 (Condicional) -->
+            <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo_2 || inspeccionStore.inspeccionActual.red_va_a_pozo_2" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300 pt-4 border-t border-slate-200 dark:border-slate-800 border-dashed">
+              <div class="flex items-center gap-4">
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Conductos Secundarios</h3>
+                <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
               </div>
 
-              <div class="grid grid-cols-2 gap-6">
-                <div class="flex flex-col gap-3 col-span-2">
-                  <label class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Material Salida</label>
-                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
-                    <button 
-                      v-for="m in materialesList" 
-                      :key="m.id"
-                      @click="inspeccionStore.inspeccionActual.colector_mat_salida = m.id"
-                      :class="inspeccionStore.inspeccionActual.colector_mat_salida === m.id 
-                        ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-                      class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
-                    >
-                      {{ m.label }}
-                    </button>
+              <!-- Colector Entrada 2 (Solo si hay ID) -->
+              <div v-if="inspeccionStore.inspeccionActual.red_viene_de_pozo_2" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-emerald-600">login</span>
+                  </div>
+                  <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Entrada 2</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label class="text-[10px] font-black uppercase tracking-[0.1em] text-emerald-500/70">Material Entrada 2</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                      <button 
+                        v-for="m in materialesList" 
+                        :key="m.id"
+                        @click="inspeccionStore.inspeccionActual.colector_mat_entrada_2 = m.id"
+                        :class="inspeccionStore.inspeccionActual.colector_mat_entrada_2 === m.id 
+                          ? 'bg-emerald-500 text-white shadow-lg scale-[1.02]' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                        class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
+                      >
+                        {{ m.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label for="diam_entrada_2" class="text-[10px] font-black uppercase tracking-[0.1em] text-emerald-500/70">Diámetro Entrada 2 (mm)</label>
+                    <input 
+                      id="diam_entrada_2" 
+                      v-model.number="inspeccionStore.inspeccionActual.colector_diametro_entrada_mm_2"
+                      type="number" 
+                      placeholder="Ej. 300"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none"
+                    />
                   </div>
                 </div>
-                <div class="flex flex-col gap-3 col-span-2">
-                  <label for="diam_salida" class="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">Diámetro Salida (mm)</label>
-                  <input 
-                    id="diam_salida" 
-                    v-model.number="inspeccionStore.inspeccionActual.colector_diametro_salida_mm"
-                    type="number" 
-                    placeholder="Ej. 300"
-                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue outline-none"
-                  />
+              </div>
+
+              <!-- Colector Salida 2 (Solo si hay ID) -->
+              <div v-if="inspeccionStore.inspeccionActual.red_va_a_pozo_2" class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-indigo-600">logout</span>
+                  </div>
+                  <span class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Colector Salida 2</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label class="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-500/70">Material Salida 2</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                      <button 
+                        v-for="m in materialesList" 
+                        :key="m.id"
+                        @click="inspeccionStore.inspeccionActual.colector_mat_salida_2 = m.id"
+                        :class="inspeccionStore.inspeccionActual.colector_mat_salida_2 === m.id 
+                          ? 'bg-indigo-500 text-white shadow-lg scale-[1.02]' 
+                          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                        class="py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center"
+                      >
+                        {{ m.label }}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-3 col-span-2">
+                    <label for="diam_salida_2" class="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-500/70">Diámetro Salida 2 (mm)</label>
+                    <input 
+                      id="diam_salida_2" 
+                      v-model.number="inspeccionStore.inspeccionActual.colector_diametro_salida_mm_2"
+                      type="number" 
+                      placeholder="Ej. 300"
+                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl h-14 px-4 text-slate-900 dark:text-white font-black text-xs focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -256,11 +403,11 @@ const UTM_29N = "+proj=utm +zone=29 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m
 const WGS84 = "EPSG:4326";
 
 const inspeccionStore = useInspeccionStore();
-const modoSeleccion = ref<'desde' | 'hacia' | null>(null);
+const modoSeleccion = ref<'desde' | 'hacia' | 'desde2' | 'hacia2' | null>(null);
 
 let map: L.Map | null = null;
 let wellsLayer: L.LayerGroup | null = null;
-let networkLines: L.Polyline | null = null;
+let networkLines = L.featureGroup();
 let gisLayerGroup: L.LayerGroup | null = null;
 let gisLayers: { [key: string]: L.Layer } = {};
 
@@ -303,7 +450,7 @@ const initMap = () => {
     }).addTo(map);
 
     wellsLayer = L.layerGroup().addTo(map);
-    networkLines = L.polyline([], { color: '#3b82f6', weight: 8, dashArray: '12, 12', opacity: 0.8 }).addTo(map);
+    networkLines.addTo(map);
     gisLayerGroup = L.layerGroup().addTo(map);
 
     // [NUEVO] Capas de Red GIS
@@ -419,6 +566,12 @@ const cargarInventario = async () => {
                 } else if (modoSeleccion.value === 'hacia') {
                     inspeccionStore.inspeccionActual.red_va_a_pozo = id_pozo;
                     modoSeleccion.value = null;
+                } else if (modoSeleccion.value === 'desde2') {
+                    inspeccionStore.inspeccionActual.red_viene_de_pozo_2 = id_pozo;
+                    modoSeleccion.value = null;
+                } else if (modoSeleccion.value === 'hacia2') {
+                    inspeccionStore.inspeccionActual.red_va_a_pozo_2 = id_pozo;
+                    modoSeleccion.value = null;
                 }
             }).bindTooltip(id_pozo, { direction: 'bottom', className: 'well-label-small' });
         });
@@ -433,35 +586,43 @@ const cargarInventario = async () => {
 
 const actualizarLineaRed = () => {
     if (!map || !networkLines) return;
-    networkLines.setLatLngs([]);
+    networkLines.clearLayers();
 
-    const vD = inspeccionStore.inspeccionActual.red_viene_de_pozo;
-    const vA = inspeccionStore.inspeccionActual.red_va_a_pozo;
-    
     // Coordenadas del pozo actual
     const { x, y } = inspeccionStore.inspeccionActual.coordenadas_utm;
     if (!x || !y) return;
     const [l_curr, lat_curr] = proj4(UTM_29N, WGS84, [x, y]);
     const p_actual = L.latLng(lat_curr, l_curr);
 
-    const points: L.LatLng[] = [];
-
-    if (vD && wellsCoordsCache.has(vD)) {
-        points.push(wellsCoordsCache.get(vD)!);
-        points.push(p_actual);
+    // Grupo 1
+    const vD1 = inspeccionStore.inspeccionActual.red_viene_de_pozo;
+    const vA1 = inspeccionStore.inspeccionActual.red_va_a_pozo;
+    
+    if (vD1 && wellsCoordsCache.has(vD1)) {
+        L.polyline([wellsCoordsCache.get(vD1)!, p_actual], { color: '#10b981', weight: 8, dashArray: '12, 12', opacity: 0.8 }).addTo(networkLines);
+    }
+    if (vA1 && wellsCoordsCache.has(vA1)) {
+        L.polyline([p_actual, wellsCoordsCache.get(vA1)!], { color: '#3b82f6', weight: 8, dashArray: '12, 12', opacity: 0.8 }).addTo(networkLines);
     }
 
-    if (vA && wellsCoordsCache.has(vA)) {
-        if (points.length === 0) points.push(p_actual);
-        points.push(wellsCoordsCache.get(vA)!);
-    }
+    // Grupo 2
+    const vD2 = inspeccionStore.inspeccionActual.red_viene_de_pozo_2;
+    const vA2 = inspeccionStore.inspeccionActual.red_va_a_pozo_2;
 
-    if (points.length > 1) {
-        networkLines.setLatLngs(points);
+    if (vD2 && wellsCoordsCache.has(vD2)) {
+        L.polyline([wellsCoordsCache.get(vD2)!, p_actual], { color: '#059669', weight: 8, dashArray: '8, 16', opacity: 0.6 }).addTo(networkLines);
+    }
+    if (vA2 && wellsCoordsCache.has(vA2)) {
+        L.polyline([p_actual, wellsCoordsCache.get(vA2)!], { color: '#4f46e5', weight: 8, dashArray: '8, 16', opacity: 0.6 }).addTo(networkLines);
     }
 };
 
-watch(() => [inspeccionStore.inspeccionActual.red_viene_de_pozo, inspeccionStore.inspeccionActual.red_va_a_pozo], () => {
+watch(() => [
+    inspeccionStore.inspeccionActual.red_viene_de_pozo, 
+    inspeccionStore.inspeccionActual.red_va_a_pozo,
+    inspeccionStore.inspeccionActual.red_viene_de_pozo_2,
+    inspeccionStore.inspeccionActual.red_va_a_pozo_2
+], () => {
     actualizarLineaRed();
 });
 </script>

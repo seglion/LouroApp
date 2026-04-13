@@ -1,19 +1,37 @@
-# Plan de Acción: Integración de Inventario Geoespacial (Radar de Pozos)
+# Tareas: Tipo de Cierre y Foto de Esquema (PRODUCCIÓN)
 
-## Análisis y Diseño (Frontend Design)
-- **Concepto**: "Radar de Activos Cercanos". El operario ve automáticamente los pozos en un radio de 100m.
-- **A estética**: Industrial Utilitarian. Marcadores precisos, círculos de radio técnicos.
-- **Diferenciación**: Selección interactiva desde mapa para evitar errores de escritura en IDs.
+## Migraciones de Datos
+- [x] Ejecutar el siguiente script SQL en la base de datos de producción (PostgreSQL):
+  ```sql
+  ALTER TABLE pozos_saneamiento 
+    ADD COLUMN red_viene_de_pozo_2 VARCHAR(50),
+    ADD COLUMN red_va_a_pozo_2 VARCHAR(50),
+    ADD COLUMN colector_mat_entrada_2 VARCHAR(50),
+    ADD COLUMN colector_diametro_entrada_mm_2 INTEGER,
+    ADD COLUMN colector_mat_salida_2 VARCHAR(50),
+    ADD COLUMN colector_diametro_salida_mm_2 INTEGER,
+    ADD COLUMN ruta_foto_esquema TEXT;
+  ```
+- [ ] Incrementar versión a **3** en `src/db/db.ts` (IndexedDB)
 
-## Tareas
-- [x] **Datos Mock**: Crear un set de datos de ejemplo (Pozos) cerca de las coordenadas de trabajo habituales.
-- [x] **Lógica Espacial**: Implementar filtro de proximidad (distancia Euclídea en UTM).
-- [x] **Componente Mapa (`Paso1_General.vue`)**:
-    - [x] Añadir capa de "Radar" (Círculo de 100m alrededor del GPS).
-    - [x] Añadir capa de "Pozos Cercanos" con iconos diferenciados.
-    - [x] Implementar evento `click` en los pozos para capturar el `id_pozo`.
-- [x] **Estilo**: Asegurar que los marcadores y el radar se integren con el diseño premium/industrial.
+## Backend (API)
+- [x] Actualizar entidad de dominio en `src/domain/entities.py`
+- [x] Actualizar modelo de base de datos en `src/infrastructure/db/models.py`
+- [x] Actualizar esquemas de Pydantic en `src/infrastructure/api/schemas.py`
+- [x] Actualizar lógica de creación/actualización en `src/infrastructure/api/main.py`
+- [x] Actualizar script de inicialización `01_init_schema.sql`
+
+## Worker On-Premise
+- [ ] Modificar `main.py` para detectar sufijo `_esquema` en fotos
+- [ ] Añadir campo `ruta_foto_esquema` al esquema de GeoPackage
+
+## Frontend (PWA)
+- [ ] Actualizar interfaces y tipos en `src/db/db.ts`
+- [ ] Actualizar el store de Pinia `src/store/inspeccion.ts`
+- [ ] Añadir opción "Normal" en `src/views/inspeccion/Paso3_Tapa.vue`
+- [ ] Implementar captura de foto "Esquema" en `src/views/inspeccion/Paso2_Detalles.vue`
 
 ## Verificación
-- [ ] Simular captura de GPS y comprobar que aparecen puntos cercanos.
-- [ ] Hacer clic en un punto y verificar que el campo `ID del Activo` se rellena solo.
+- [ ] Probar persistencia local (IndexedDB)
+- [ ] Verificar descarga de fotos en el Worker
+- [ ] Confirmar generación de nueva columna en GeoPackage

@@ -49,8 +49,15 @@ CREATE TABLE pozos_saneamiento (
     colector_diametro_entrada_mm INTEGER,
     colector_mat_salida VARCHAR(50),
     colector_diametro_salida_mm INTEGER,
+    red_viene_de_pozo_2 VARCHAR(50),
+    red_va_a_pozo_2 VARCHAR(50),
+    colector_mat_entrada_2 VARCHAR(50),
+    colector_diametro_entrada_mm_2 INTEGER,
+    colector_mat_salida_2 VARCHAR(50),
+    colector_diametro_salida_mm_2 INTEGER,
     ruta_foto_situacion TEXT,
     ruta_foto_interior TEXT,
+    ruta_foto_esquema TEXT,
     foto_keys TEXT[] DEFAULT '{}',
     observaciones TEXT
 );

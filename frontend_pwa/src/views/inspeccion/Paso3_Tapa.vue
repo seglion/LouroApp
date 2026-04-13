@@ -123,7 +123,7 @@
             <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Tipo de Cierre</label>
             <div class="flex p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
               <button 
-                v-for="opt in ['Estanca', 'Ventilada', 'Ciega', 'Abatible']" 
+                v-for="opt in ['Estanca', 'Ventilada', 'Normal', 'Ciega', 'Abatible']" 
                 :key="opt"
                 @click="inspeccionStore.inspeccionActual.tapa_tipo = opt"
                 :class="inspeccionStore.inspeccionActual.tapa_tipo === opt 

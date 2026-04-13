@@ -34,25 +34,34 @@ const getInitialState = () => ({
         tapa_largo_mm: null as number | null,
         tapa_ancho_mm: null as number | null,
         red_tipo: 'Unitario',
-        red_viene_de_pozo: '',
-        red_va_a_pozo: '',
+        red_viene_de_pozo: null as string | null,
+        red_va_a_pozo: null as string | null,
+        red_viene_de_pozo_2: null as string | null,
+        red_va_a_pozo_2: null as string | null,
         red_carga: 'Media',
-        colector_mat_entrada: 'PVC',
+        colector_mat_entrada: 'PVC' as string | null,
         colector_diametro_entrada_mm: null as number | null,
-        colector_mat_salida: 'PVC',
+        colector_mat_salida: 'PVC' as string | null,
         colector_diametro_salida_mm: null as number | null,
+        colector_mat_entrada_2: null as string | null,
+        colector_diametro_entrada_mm_2: null as number | null,
+        colector_mat_salida_2: null as string | null,
+        colector_diametro_salida_mm_2: null as number | null,
         acometidas: [] as any[],
         estado_paso: 1,
         finalizada: false,
         ruta_foto_situacion: null as string | null,
         ruta_foto_interior: null as string | null,
+        ruta_foto_esquema: null as string | null,
         no_inspeccionable: false
     },
     fotosTemporales: {
         situacion: null as string | null,
         interior: null as string | null,
+        esquema: null as string | null,
         blob_situacion: null as Blob | null,
-        blob_interior: null as Blob | null
+        blob_interior: null as Blob | null,
+        blob_esquema: null as Blob | null
     }
 });
 
@@ -156,17 +165,31 @@ export const useInspeccionStore = defineStore('inspeccion', {
                 // Clonar el objeto de forma nativa eliminando proxies de Vue
                 const plainData = structuredClone(toRaw(this.inspeccionActual));
 
+                // Limpieza de campos opcionales: convertir "" a null
+                const cleanStr = (val: any) => (val === '' ? null : val);
+                
+                plainData.red_viene_de_pozo = cleanStr(plainData.red_viene_de_pozo);
+                plainData.red_va_a_pozo = cleanStr(plainData.red_va_a_pozo);
+                plainData.red_viene_de_pozo_2 = cleanStr(plainData.red_viene_de_pozo_2);
+                plainData.red_va_a_pozo_2 = cleanStr(plainData.red_va_a_pozo_2);
+                
+                plainData.colector_mat_entrada = cleanStr(plainData.colector_mat_entrada);
+                plainData.colector_mat_salida = cleanStr(plainData.colector_mat_salida);
+                plainData.colector_mat_entrada_2 = cleanStr(plainData.colector_mat_entrada_2);
+                plainData.colector_mat_salida_2 = cleanStr(plainData.colector_mat_salida_2);
+
                 const data: InspeccionLocal = {
                     ...plainData,
                     sync_status: 'pending',
                     last_modified: new Date().toISOString(),
                     // Inyectar los blobs para persistencia offline real
                     blob_foto_situacion: this.fotosTemporales.blob_situacion,
-                    blob_foto_interior: this.fotosTemporales.blob_interior
+                    blob_foto_interior: this.fotosTemporales.blob_interior,
+                    blob_foto_esquema: this.fotosTemporales.blob_esquema
                 };
 
                 await db.inspecciones.put(data);
-                console.log('Inspección guardada con éxito en IndexedDB:', data.id);
+                console.log('Inspección guardada con éxito en IndexedDB (limpio):', data.id);
             } catch (error) {
                 console.error('Error crítico al guardar en IndexedDB:', error);
                 throw error; // Re-lanzar para que quien llame pueda manejarlo si es necesario
@@ -176,7 +199,7 @@ export const useInspeccionStore = defineStore('inspeccion', {
             const data = await db.inspecciones.get(id);
             if (data) {
                 // Separar metadatos de IndexedDB de los datos de la inspección
-                const { sync_status, last_modified, blob_foto_situacion, blob_foto_interior, ...datosInspeccion } = data;
+                const { sync_status, last_modified, blob_foto_situacion, blob_foto_interior, blob_foto_esquema, ...datosInspeccion } = data;
 
                 // Mezclar con el estado inicial para rellenar campos vacíos en borradores antiguos
                 const defaults = getInitialState().inspeccionActual;
@@ -184,8 +207,8 @@ export const useInspeccionStore = defineStore('inspeccion', {
                     ...defaults,
                     ...datosInspeccion,
                     // Asegurar que si los strings están vacíos pero tienen default, se usen los defaults
-                    colector_mat_entrada: datosInspeccion.colector_mat_entrada || defaults.colector_mat_entrada,
-                    colector_mat_salida: datosInspeccion.colector_mat_salida || defaults.colector_mat_salida,
+                    colector_mat_entrada: datosInspeccion.colector_mat_entrada ?? defaults.colector_mat_entrada,
+                    colector_mat_salida: datosInspeccion.colector_mat_salida ?? defaults.colector_mat_salida,
                     material_pozo: datosInspeccion.material_pozo || defaults.material_pozo,
                     tapa_material: datosInspeccion.tapa_material || defaults.tapa_material,
                     tapa_forma: datosInspeccion.tapa_forma || defaults.tapa_forma,
@@ -200,6 +223,10 @@ export const useInspeccionStore = defineStore('inspeccion', {
                 if (blob_foto_interior) {
                     this.fotosTemporales.blob_interior = blob_foto_interior;
                     this.fotosTemporales.interior = URL.createObjectURL(blob_foto_interior);
+                }
+                if (blob_foto_esquema) {
+                    this.fotosTemporales.blob_esquema = blob_foto_esquema;
+                    this.fotosTemporales.esquema = URL.createObjectURL(blob_foto_esquema);
                 }
 
                 console.log('Inspección cargada desde IndexedDB:', id);
@@ -219,8 +246,8 @@ export const useInspeccionStore = defineStore('inspeccion', {
                     this.inspeccionActual = {
                         ...defaults,
                         ...datos,
-                        colector_mat_entrada: datos.colector_mat_entrada || defaults.colector_mat_entrada,
-                        colector_mat_salida: datos.colector_mat_salida || defaults.colector_mat_salida,
+                        colector_mat_entrada: datos.colector_mat_entrada ?? defaults.colector_mat_entrada,
+                        colector_mat_salida: datos.colector_mat_salida ?? defaults.colector_mat_salida,
                         material_pozo: datos.material_pozo || defaults.material_pozo,
                         tapa_material: datos.tapa_material || defaults.tapa_material,
                         tapa_forma: datos.tapa_forma || defaults.tapa_forma,

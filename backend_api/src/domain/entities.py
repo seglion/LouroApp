@@ -63,8 +63,15 @@ class Inspeccion:
     colector_diametro_entrada_mm: Optional[int] = None
     colector_mat_salida: Optional[str] = None
     colector_diametro_salida_mm: Optional[int] = None
+    red_viene_de_pozo_2: Optional[str] = None
+    red_va_a_pozo_2: Optional[str] = None
+    colector_mat_entrada_2: Optional[str] = None
+    colector_diametro_entrada_mm_2: Optional[int] = None
+    colector_mat_salida_2: Optional[str] = None
+    colector_diametro_salida_mm_2: Optional[int] = None
     ruta_foto_situacion: Optional[str] = None
     ruta_foto_interior: Optional[str] = None
+    ruta_foto_esquema: Optional[str] = None
     observaciones: Optional[str] = None
     foto_keys: list[str] = field(default_factory=list)
     acometidas: List[Acometida] = field(default_factory=list)

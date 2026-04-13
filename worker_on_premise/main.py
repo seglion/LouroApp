@@ -216,6 +216,7 @@ def process_message(ch, method, properties, body):
             foto_keys = pozo.get("foto_keys", [])
             path_situacion = ""
             path_interior = ""
+            path_esquema = ""
             
             for key in foto_keys:
                 filename = key.split("/")[-1]
@@ -224,12 +225,16 @@ def process_message(ch, method, properties, body):
                     path_situacion = full_local_path
                 elif "_interior" in filename.lower() or "_pozo" in filename.lower():
                     path_interior = full_local_path
+                elif "_esquema" in filename.lower():
+                    path_esquema = full_local_path
             
             # Fallback a campos antiguos por si acaso
             if not path_situacion and pozo.get("ruta_foto_situacion"):
                 path_situacion = os.path.join(download_dir, pozo.get("ruta_foto_situacion", "").split("/")[-1])
             if not path_interior and pozo.get("ruta_foto_interior"):
                 path_interior = os.path.join(download_dir, pozo.get("ruta_foto_interior", "").split("/")[-1])
+            if not path_esquema and pozo.get("ruta_foto_esquema"):
+                path_esquema = os.path.join(download_dir, pozo.get("ruta_foto_esquema", "").split("/")[-1])
 
             row_data = {
                 "id": clean_val("id", ""),
@@ -260,13 +265,20 @@ def process_message(ch, method, properties, body):
                 "red_tipo": clean_val("red_tipo", ""),
                 "red_viene_de_pozo": clean_val("red_viene_de_pozo", ""),
                 "red_va_a_pozo": clean_val("red_va_a_pozo", ""),
+                "red_viene_de_pozo_2": clean_val("red_viene_de_pozo_2", ""),
+                "red_va_a_pozo_2": clean_val("red_va_a_pozo_2", ""),
                 "red_carga": clean_val("red_carga", ""),
                 "colector_mat_entrada": clean_val("colector_mat_entrada", ""),
                 "colector_diametro_entrada_mm": int(pozo.get("colector_diametro_entrada_mm") or 0),
                 "colector_mat_salida": clean_val("colector_mat_salida", ""),
                 "colector_diametro_salida_mm": int(pozo.get("colector_diametro_salida_mm") or 0),
+                "colector_mat_entrada_2": clean_val("colector_mat_entrada_2", ""),
+                "colector_diametro_entrada_mm_2": int(pozo.get("colector_diametro_entrada_mm_2") or 0),
+                "colector_mat_salida_2": clean_val("colector_mat_salida_2", ""),
+                "colector_diametro_salida_mm_2": int(pozo.get("colector_diametro_salida_mm_2") or 0),
                 "ruta_foto_situacion": translate_to_host_path(path_situacion),
                 "ruta_foto_interior": translate_to_host_path(path_interior),
+                "ruta_foto_esquema": translate_to_host_path(path_esquema),
                 "observaciones": clean_val("observaciones", ""),
                 "geometry": geom
             }
@@ -287,9 +299,12 @@ def process_message(ch, method, properties, body):
                     "tapa_forma": "str", "tapa_tipo": "str", "tapa_material": "str",
                     "tapa_diametro_mm": "int", "tapa_largo_mm": "int", "tapa_ancho_mm": "int",
                     "red_tipo": "str", "red_viene_de_pozo": "str", "red_va_a_pozo": "str",
+                    "red_viene_de_pozo_2": "str", "red_va_a_pozo_2": "str",
                     "red_carga": "str", "colector_mat_entrada": "str", "colector_diametro_entrada_mm": "int",
                     "colector_mat_salida": "str", "colector_diametro_salida_mm": "int",
-                    "ruta_foto_situacion": "str", "ruta_foto_interior": "str",
+                    "colector_mat_entrada_2": "str", "colector_diametro_entrada_mm_2": "int",
+                    "colector_mat_salida_2": "str", "colector_diametro_salida_mm_2": "int",
+                    "ruta_foto_situacion": "str", "ruta_foto_interior": "str", "ruta_foto_esquema": "str",
                     "observaciones": "str", "num_acometidas": "int", "acometidas_json": "str"
                 }
             }
