@@ -455,7 +455,7 @@ const cargarInventario = async () => {
     
     if (totalEnDb === 0) {
       console.log("Inventario vacío. Descargando repositorio de pozos...");
-      const response = await fetch('/data/pozos.geojson?v=7');
+      const response = await fetch('/data/pozos.geojson?v=8');
       if (!response.ok) throw new Error("No se pudo descargar el inventario inicial.");
       
       const data = await response.json();
@@ -555,14 +555,15 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
     detectados.push(pozo.id);
     const isSelected = pozo.id === inspeccionStore.inspeccionActual.id_pozo;
     const [lng, lat] = proj4(UTM_29N, WGS84, [pozo.x, pozo.y]);
+    const isEB = pozo.properties.is_eb || pozo.properties.Tipo === 'EstacionDeBombeo';
     
     const wellMarker = L.marker([lat, lng], {
-      zIndexOffset: isSelected ? 2000 : 500, // Siempre por encima de las redes y del GPS si está seleccionado
+      zIndexOffset: isSelected ? 2000 : (isEB ? 600 : 500), 
       icon: L.divIcon({
-        className: `well-marker-radar ${isSelected ? 'is-selected' : ''}`,
+        className: `well-marker-radar ${isSelected ? 'is-selected' : ''} ${isEB ? 'is-eb' : ''}`,
         html: `<div class="well-dot"></div><span class="well-label">${pozo.properties.COD_CAMPO || pozo.id}</span>`,
-iconSize: [30,30],   // <-- Cambia este 60 por el tamaño que quieras
-iconAnchor: [15,15]
+        iconSize: [30,30],
+        iconAnchor: [15,15]
       })
     });
 
@@ -725,7 +726,25 @@ input[type=number] {
 :deep(.well-marker-radar.is-selected .well-label) {
   background: #3b82f6;
   opacity: 1;
-  transform: translateY(2px) scale(1.1);
+}
+
+/* Estilo Estaciones de Bombeo (EB) - Cuadradas */
+:deep(.well-marker-radar.is-eb .well-dot) {
+  background: #f97316; /* Naranja boutique */
+  border-radius: 4px; /* Cuadrado con bordes suaves */
+  width: 14px;
+  height: 14px;
+  border: 2px solid white;
+}
+
+:deep(.well-marker-radar.is-eb.is-selected .well-dot) {
+  background: #f97316;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.4);
+  transform: scale(1.3);
+}
+
+:deep(.well-marker-radar.is-eb .well-label) {
+  background: #c2410c; /* Naranja más oscuro para el texto */
 }
 
 /* Utilidades para el Carrusel */
