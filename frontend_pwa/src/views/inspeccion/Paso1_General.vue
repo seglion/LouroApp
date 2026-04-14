@@ -15,7 +15,7 @@
       <div class="absolute bottom-4 left-4 z-10 px-3 py-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2">
         <div class="flex h-2 w-2 rounded-full" :class="coordenadasListas ? 'bg-green-500' : 'bg-amber-500 animate-pulse'"></div>
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
-          {{ coordenadasListas ? `Radar: 100m | GPS: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
+          {{ coordenadasListas ? `Radar: 200m | GPS: ±${precisionGPS?.toFixed(1) || '0'}m` : 'GPS: BUSCANDO...' }}
         </span>
       </div>
     </div>
@@ -68,7 +68,7 @@
           
           <!-- Sugerencias del Radar (Carrusel Lateral) -->
           <div v-if="pozosDetectadosIds.length > 0" class="flex flex-col gap-2 animate-in overflow-hidden">
-            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (100m)</span>
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Sugerencias Radar (200m)</span>
             <div class="flex flex-nowrap gap-2 overflow-x-auto pb-2 px-1 scrollbar-hide snap-x">
               <button 
                 v-for="id in pozosDetectadosIds" 
@@ -428,7 +428,7 @@ const actualizarMarcador = () => {
         // 2. Actualizar Radar (100m)
         if (radarCircle) map.removeLayer(radarCircle);
         radarCircle = L.circle(coords, {
-            radius: 100,
+            radius: 200,
             color: '#FACC15',
             fillColor: '#FACC15',
             fillOpacity: 0.15,
@@ -455,21 +455,27 @@ const cargarInventario = async () => {
     
     if (totalEnDb === 0) {
       console.log("Inventario vacío. Descargando repositorio de pozos...");
-      const response = await fetch('/data/pozos.geojson');
+      const response = await fetch('/data/pozos.geojson?v=7');
       if (!response.ok) throw new Error("No se pudo descargar el inventario inicial.");
       
       const data = await response.json();
       if (data && data.features) {
         console.log("Procesando e indexando pozos para uso offline...");
-        const batch = data.features.map((f: any) => ({
-          id: String(f.properties.COD_CAMPO || f.properties.ObjectId || f.properties.id),
-          x: f.geometry.coordinates[0],
-          y: f.geometry.coordinates[1],
-          properties: f.properties
-        }));
+        const batch = data.features
+          .filter((f: any) => f.geometry && f.geometry.coordinates) 
+          .map((f: any, index: number) => ({
+            // Usar index o ObjectID para asegurar que NUNCA colisionen aunque se llamen igual
+            id: String(f.properties.ObjectId || f.properties.id || `pozo_${index}_${Date.now()}`),
+            x: f.geometry.coordinates[0],
+            y: f.geometry.coordinates[1],
+            properties: {
+              ...f.properties,
+              COD_CAMPO: f.properties.COD_CAMPO || f.properties.CodigoExpl || 'S/N'
+            }
+          }));
         
-        await db.inventario_pozos.bulkAdd(batch);
-        console.log(`¡Inventario indexado! ${batch.length} pozos guardados.`);
+        await db.inventario_pozos.bulkPut(batch);
+        console.log(`¡Inventario indexado! ${batch.length} pozos guardados (IDs únicas).`);
       }
     } else {
       // Verificar si los datos existentes son antiguos (ObjectId vs COD_CAMPO)
@@ -497,7 +503,8 @@ const cargarCapasGIS = async () => {
 
   const capas = [
     { url: '/data/principales.geojson', style: { color: '#FF0000', weight: 6, opacity: 1 }, name: 'principales' },
-    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' }
+    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' },
+    { url: '/data/Prioritaria.geojson', style: { color: '#3b82f6', weight: 6, opacity: 1 }, name: 'prioritarios' }
   ];
 
   for (const capa of capas) {
@@ -529,7 +536,7 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
   if (!nearbyWellsLayer || !map) return;
   nearbyWellsLayer.clearLayers();
   
-  const radioBusqueda = 100;
+  const radioBusqueda = 200;
 
   // Búsqueda espacial optimizada: Filtramos primero por Bounding Box cuadrado 
   // antes de calcular la distancia euclídea exacta
@@ -553,7 +560,7 @@ const actualizarPozosCercanos = async (userX: number, userY: number) => {
       zIndexOffset: isSelected ? 2000 : 500, // Siempre por encima de las redes y del GPS si está seleccionado
       icon: L.divIcon({
         className: `well-marker-radar ${isSelected ? 'is-selected' : ''}`,
-        html: `<div class="well-dot"></div><span class="well-label">${pozo.id}</span>`,
+        html: `<div class="well-dot"></div><span class="well-label">${pozo.properties.COD_CAMPO || pozo.id}</span>`,
 iconSize: [30,30],   // <-- Cambia este 60 por el tamaño que quieras
 iconAnchor: [15,15]
       })

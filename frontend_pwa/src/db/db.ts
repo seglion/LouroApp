@@ -89,9 +89,12 @@ export class AppDB extends Dexie {
 
     constructor() {
         super('LouroAppDB');
-        this.version(3).stores({
+        this.version(7).stores({
             inspecciones: 'id, id_pozo, sync_status, last_modified, finalizada',
             inventario_pozos: 'id, x, y' // Índices para búsquedas espaciales si fuera necesario
+        }).upgrade(tx => {
+            // Fuerza la limpieza del inventario para re-importar el nuevo GeoJSON
+            return tx.table('inventario_pozos').clear();
         });
     }
 }
