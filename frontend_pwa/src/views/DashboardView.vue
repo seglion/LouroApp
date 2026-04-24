@@ -159,9 +159,18 @@
                     </button>
                   </template>
                 </div>
-                <!-- Badge sincronizado -->
-                <div v-else class="h-8 px-3 flex items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
-                  <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600">Sync</span>
+                <!-- Acciones para registros sincronizados (Solo Lectura) -->
+                <div v-else class="flex items-center gap-2">
+                  <div class="h-8 px-3 flex items-center justify-center rounded-lg bg-emerald-100/50 dark:bg-emerald-900/20">
+                    <span class="text-[8px] font-black uppercase tracking-widest text-emerald-600">Sincronizado</span>
+                  </div>
+                  <button
+                    @click.stop.prevent="editarInspeccion(item.id)"
+                    class="h-9 w-9 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all active:scale-90"
+                    title="Ver Detalles"
+                  >
+                    <span class="material-symbols-outlined text-xl">visibility</span>
+                  </button>
                 </div>
               </div>
             </div>

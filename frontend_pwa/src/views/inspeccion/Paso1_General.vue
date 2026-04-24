@@ -6,7 +6,7 @@
       
       <!-- Overlays for Map Control -->
       <div class="absolute top-4 right-4 z-10 flex flex-col gap-2">
-        <button @click="capturarGPS" class="flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-primary dark:text-accent-blue shadow-lg border border-slate-200 dark:border-slate-800 active:scale-95 transition-all">
+        <button @click="capturarGPS" :disabled="inspeccionStore.esLectura" :class="inspeccionStore.esLectura ? 'opacity-50 grayscale' : 'active:scale-95'" class="flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-primary dark:text-accent-blue shadow-lg border border-slate-200 dark:border-slate-800 transition-all">
           <span class="material-symbols-outlined">my_location</span>
         </button>
       </div>
@@ -24,13 +24,19 @@
     <div class="flex-1 p-6 md:p-10 space-y-8 overflow-y-auto">
       
       <!-- Section Header -->
-      <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-6">
-        <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Información General</h2>
+      <div class="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Información General</h2>
+          <div v-if="inspeccionStore.esLectura" class="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <span class="material-symbols-outlined text-green-500 text-sm">cloud_done</span>
+            <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Sincronizado</span>
+          </div>
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Registro Técnico de Activos / Referenciación Espacial</p>
       </div>
 
       <!-- Form Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+      <fieldset :disabled="inspeccionStore.esLectura" class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-none p-0 m-0">
         
         <!-- Id Activo -->
         <div class="flex flex-col gap-3">
@@ -126,7 +132,9 @@
               <button 
                 type="button"
                 @click="simularAsGandaras"
-                class="text-[9px] font-black text-white bg-slate-900 dark:bg-accent-blue px-3 py-1 rounded-full uppercase hover:scale-105 active:scale-95 transition-all"
+                :disabled="inspeccionStore.esLectura"
+                :class="inspeccionStore.esLectura ? 'opacity-30' : 'hover:scale-105 active:scale-95'"
+                class="text-[9px] font-black text-white bg-slate-900 dark:bg-accent-blue px-3 py-1 rounded-full uppercase transition-all"
               >
                 Simular As Gándaras
               </button>
@@ -199,7 +207,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </fieldset>
       
       <!-- Placeholder spacing for navigation bar -->
       <div class="h-24 md:hidden"></div>

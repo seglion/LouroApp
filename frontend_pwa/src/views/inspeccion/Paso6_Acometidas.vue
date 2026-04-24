@@ -3,20 +3,29 @@
     <div class="flex-1 p-6 md:p-10 space-y-10 max-w-[1024px] mx-auto w-full">
       
       <!-- Section Header -->
-      <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-6">
-        <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Acometidas</h2>
+      <div class="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Acometidas</h2>
+          <div v-if="inspeccionStore.esLectura" class="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <span class="material-symbols-outlined text-green-500 text-sm">cloud_done</span>
+            <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Sincronizado</span>
+          </div>
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Registro de conexiones domiciliarias al pozo</p>
       </div>
 
-      <div class="space-y-8">
         <!-- Add Button -->
         <button 
           @click="anyadirAcometida"
-          class="w-full py-6 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl flex items-center justify-center gap-4 text-slate-500 hover:border-accent-blue hover:text-accent-blue hover:bg-accent-blue/5 transition-all group shadow-sm"
+          :disabled="inspeccionStore.esLectura"
+          :class="inspeccionStore.esLectura ? 'opacity-30 cursor-not-allowed' : 'hover:border-accent-blue hover:text-accent-blue hover:bg-accent-blue/5'"
+          class="w-full py-6 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl flex items-center justify-center gap-4 text-slate-500 transition-all group shadow-sm"
         >
           <span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform">add_circle</span>
           <span class="text-xs font-black uppercase tracking-[0.2em]">Añadir Nueva Acometida</span>
         </button>
+
+        <fieldset :disabled="inspeccionStore.esLectura" class="space-y-8 border-none p-0 m-0">
 
         <!-- Empty State -->
         <div v-if="acometidas.length === 0" class="py-20 flex flex-col items-center justify-center text-slate-400 gap-6 bg-white/50 dark:bg-slate-900/50 rounded-3xl border border-slate-200/50 dark:border-slate-800/50">
@@ -41,7 +50,7 @@
                 </span>
                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Acometida Domiciliaria</span>
               </div>
-              <button @click="eliminarAcometida(index)" class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all">
+              <button v-if="!inspeccionStore.esLectura" @click="eliminarAcometida(index)" class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all">
                 <span class="material-symbols-outlined text-[18px]">delete</span>
               </button>
             </div>
@@ -93,7 +102,7 @@
             </div>
           </div>
         </div>
-      </div>
+        </fieldset>
 
       <!-- Placeholder spacing for navigation bar (Mobile only) -->
       <div class="h-24 md:hidden"></div>
@@ -111,6 +120,7 @@ const inspeccionStore = useInspeccionStore();
 const acometidas = computed(() => inspeccionStore.inspeccionActual.acometidas);
 
 const anyadirAcometida = () => {
+  if (inspeccionStore.esLectura) return;
   const nuevaAcometida = {
     id: uuidv4(),
     numero_acometida: acometidas.value.length + 1,
@@ -122,6 +132,7 @@ const anyadirAcometida = () => {
 };
 
 const eliminarAcometida = (index: number) => {
+  if (inspeccionStore.esLectura) return;
   inspeccionStore.inspeccionActual.acometidas.splice(index, 1);
   // Re-numerar para mantener consistencia
   inspeccionStore.inspeccionActual.acometidas.forEach((ac, idx) => {

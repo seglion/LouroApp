@@ -3,141 +3,149 @@
     <div class="flex-1 p-6 md:p-10 space-y-10 max-w-[1024px] mx-auto w-full">
       
       <!-- Section Header -->
-      <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-6">
-        <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Detalles de la Tapa</h2>
+      <div class="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Detalles de la Tapa</h2>
+          <div v-if="inspeccionStore.esLectura" class="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <span class="material-symbols-outlined text-green-500 text-sm">cloud_done</span>
+            <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Sincronizado</span>
+          </div>
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Especificaciones de cierre y acceso superior</p>
       </div>
 
-      <!-- Section: Cota y Morfología -->
-      <div class="space-y-8">
-        <div class="flex items-center gap-4">
-          <h3 class="text-xs font-black uppercase tracking-[0.2em] text-primary/50 dark:text-accent-blue/50">Ubicación y Forma</h3>
-          <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Forma de la Tapa segmentada -->
-          <div class="flex flex-col gap-4 md:col-span-2">
-            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Forma de la Tapa</label>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
-              <button 
-                v-for="forma in [
-                  { id: 'Circular', label: 'Circular', icon: 'trip_origin' },
-                  { id: 'Cuadrada', label: 'Cuadrada', icon: 'square' },
-                  { id: 'Rectangular', label: 'Rectangular', icon: 'rectangle' },
-                  { id: 'Triangular', label: 'Triangular', icon: 'change_history' }
-                ]" 
-                :key="forma.id"
-                @click="inspeccionStore.inspeccionActual.tapa_forma = forma.id"
-                :class="inspeccionStore.inspeccionActual.tapa_forma === forma.id 
-                  ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-                class="flex items-center justify-center gap-2 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
-              >
-                <span class="material-symbols-outlined text-lg">{{ forma.icon }}</span>
-                {{ forma.label }}
-              </button>
-            </div>
+      <fieldset :disabled="inspeccionStore.esLectura" class="space-y-10 border-none p-0 m-0">
+        <!-- Section: Cota y Morfología -->
+        <div class="space-y-8">
+          <div class="flex items-center gap-4">
+            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-primary/50 dark:text-accent-blue/50">Ubicación y Forma</h3>
+            <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
           </div>
-
-          <!-- Dimensiones dinámicas de la tapa -->
-          <div class="grid grid-cols-2 gap-4 md:col-span-2">
-            <div v-if="inspeccionStore.inspeccionActual.tapa_forma === 'Circular'" class="col-span-2">
-              <div class="flex flex-col gap-3">
-                <label for="tapa_diametro" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Diámetro Tapa (mm)</label>
-                <div class="relative group">
-                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">adjust</span>
-                  <input 
-                    id="tapa_diametro" 
-                    v-model.number="inspeccionStore.inspeccionActual.tapa_diametro_mm"
-                    type="number" 
-                    placeholder="600"
-                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
-                  />
-                </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Forma de la Tapa segmentada -->
+            <div class="flex flex-col gap-4 md:col-span-2">
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Forma de la Tapa</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                <button 
+                  v-for="forma in [
+                    { id: 'Circular', label: 'Circular', icon: 'trip_origin' },
+                    { id: 'Cuadrada', label: 'Cuadrada', icon: 'square' },
+                    { id: 'Rectangular', label: 'Rectangular', icon: 'rectangle' },
+                    { id: 'Triangular', label: 'Triangular', icon: 'change_history' }
+                  ]" 
+                  :key="forma.id"
+                  @click="inspeccionStore.inspeccionActual.tapa_forma = forma.id"
+                  :class="inspeccionStore.inspeccionActual.tapa_forma === forma.id 
+                    ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg scale-[1.02]' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                  class="flex items-center justify-center gap-2 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                >
+                  <span class="material-symbols-outlined text-lg">{{ forma.icon }}</span>
+                  {{ forma.label }}
+                </button>
               </div>
             </div>
-            <template v-else-if="inspeccionStore.inspeccionActual.tapa_forma !== ''">
-              <div class="flex flex-col gap-3">
-                <label for="tapa_largo" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Largo Tapa (mm)</label>
-                <div class="relative group">
-                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">straighten</span>
-                  <input 
-                    id="tapa_largo" 
-                    v-model.number="inspeccionStore.inspeccionActual.tapa_largo_mm"
-                    type="number" 
-                    placeholder="600"
-                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
-                  />
+
+            <!-- Dimensiones dinámicas de la tapa -->
+            <div class="grid grid-cols-2 gap-4 md:col-span-2">
+              <div v-if="inspeccionStore.inspeccionActual.tapa_forma === 'Circular'" class="col-span-2">
+                <div class="flex flex-col gap-3">
+                  <label for="tapa_diametro" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Diámetro Tapa (mm)</label>
+                  <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">adjust</span>
+                    <input 
+                      id="tapa_diametro" 
+                      v-model.number="inspeccionStore.inspeccionActual.tapa_diametro_mm"
+                      type="number" 
+                      placeholder="600"
+                      class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
+                    />
+                  </div>
                 </div>
               </div>
-              <div class="flex flex-col gap-3">
-                <label for="tapa_ancho" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Ancho Tapa (mm)</label>
-                <div class="relative group">
-                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">straighten</span>
-                  <input 
-                    id="tapa_ancho" 
-                    v-model.number="inspeccionStore.inspeccionActual.tapa_ancho_mm"
-                    type="number" 
-                    placeholder="600"
-                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
-                  />
+              <template v-else-if="inspeccionStore.inspeccionActual.tapa_forma !== ''">
+                <div class="flex flex-col gap-3">
+                  <label for="tapa_largo" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Largo Tapa (mm)</label>
+                  <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">straighten</span>
+                    <input 
+                      id="tapa_largo" 
+                      v-model.number="inspeccionStore.inspeccionActual.tapa_largo_mm"
+                      type="number" 
+                      placeholder="600"
+                      class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
+                    />
+                  </div>
                 </div>
-              </div>
-            </template>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: Material y Tipo -->
-      <div class="space-y-8">
-        <div class="flex items-center gap-4">
-          <h3 class="text-xs font-black uppercase tracking-[0.2em] text-primary/50 dark:text-accent-blue/50">Material y Seguridad</h3>
-          <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Material de la Tapa -->
-          <div class="flex flex-col gap-3">
-            <label for="tapa_material" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Material de la Tapa</label>
-            <div class="relative group">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">layers</span>
-              <select 
-                id="tapa_material" 
-                v-model="inspeccionStore.inspeccionActual.tapa_material"
-                class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-10 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none appearance-none"
-              >
-                <option value="" disabled selected>Seleccione material...</option>
-                <option value="Fundición Dúctil">Fundición Dúctil</option>
-                <option value="Fundición Gris">Fundición Gris</option>
-                <option value="Acero Galvanizado">Acero Galvanizado</option>
-                <option value="PRFV / Composite">PRFV / Composite</option>
-                <option value="Hormigón">Hormigón</option>
-              </select>
-              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
-            </div>
-          </div>
-
-          <!-- Tipo de Tapa -->
-          <div class="flex flex-col gap-4">
-            <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Tipo de Cierre</label>
-            <div class="flex p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
-              <button 
-                v-for="opt in ['Estanca', 'Ventilada', 'Normal', 'Ciega', 'Abatible']" 
-                :key="opt"
-                @click="inspeccionStore.inspeccionActual.tapa_tipo = opt"
-                :class="inspeccionStore.inspeccionActual.tapa_tipo === opt 
-                  ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg' 
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-                class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
-              >
-                {{ opt }}
-              </button>
+                <div class="flex flex-col gap-3">
+                  <label for="tapa_ancho" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Ancho Tapa (mm)</label>
+                  <div class="relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">straighten</span>
+                    <input 
+                      id="tapa_ancho" 
+                      v-model.number="inspeccionStore.inspeccionActual.tapa_ancho_mm"
+                      type="number" 
+                      placeholder="600"
+                      class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-4 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
+                    />
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
         </div>
-      </div>
-      
+
+        <!-- Section: Material y Tipo -->
+        <div class="space-y-8">
+          <div class="flex items-center gap-4">
+            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-primary/50 dark:text-accent-blue/50">Material y Seguridad</h3>
+            <div class="flex-1 h-px bg-slate-200 dark:border-slate-800"></div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Material de la Tapa -->
+            <div class="flex flex-col gap-3">
+              <label for="tapa_material" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Material de la Tapa</label>
+              <div class="relative group">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10">layers</span>
+                <select 
+                  id="tapa_material" 
+                  v-model="inspeccionStore.inspeccionActual.tapa_material"
+                  class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-16 pl-14 pr-10 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none appearance-none"
+                >
+                  <option value="" disabled selected>Seleccione material...</option>
+                  <option value="Fundición Dúctil">Fundición Dúctil</option>
+                  <option value="Fundición Gris">Fundición Gris</option>
+                  <option value="Acero Galvanizado">Acero Galvanizado</option>
+                  <option value="PRFV / Composite">PRFV / Composite</option>
+                  <option value="Hormigón">Hormigón</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+              </div>
+            </div>
+
+            <!-- Tipo de Tapa -->
+            <div class="flex flex-col gap-4">
+              <label class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Tipo de Cierre</label>
+              <div class="flex p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl">
+                <button 
+                  v-for="opt in ['Estanca', 'Ventilada', 'Normal', 'Ciega', 'Abatible']" 
+                  :key="opt"
+                  @click="inspeccionStore.inspeccionActual.tapa_tipo = opt"
+                  :class="inspeccionStore.inspeccionActual.tapa_tipo === opt 
+                    ? 'bg-white dark:bg-slate-700 text-primary dark:text-white shadow-lg' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
+                  class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                >
+                  {{ opt }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
       <!-- Placeholder spacing for navigation bar (Mobile only) -->
       <div class="h-24 md:hidden"></div>
     </div>

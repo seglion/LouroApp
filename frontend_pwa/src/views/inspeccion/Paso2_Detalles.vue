@@ -3,11 +3,18 @@
     <div class="flex-1 p-6 md:p-10 space-y-10 max-w-[1024px] mx-auto w-full">
       
       <!-- Section Header -->
-      <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Detalles del Pozo</h2>
+      <div class="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Detalles del Pozo</h2>
+          <div v-if="inspeccionStore.esLectura" class="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <span class="material-symbols-outlined text-green-500 text-sm">cloud_done</span>
+            <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Sincronizado</span>
+          </div>
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Especificaciones estructurales y sistemas de acceso</p>
       </div>
 
+      <fieldset :disabled="inspeccionStore.esLectura" class="space-y-10 border-none p-0 m-0">
       <!-- Section: Morfología y Material -->
       <div class="space-y-3">
         <div class="flex items-center gap-4">
@@ -196,8 +203,9 @@
           </template>
         </div>
       </div>
-      
-      <!-- Placeholder spacing for navigation bar (Mobile only) -->
+    </fieldset>
+    
+    <!-- Placeholder spacing for navigation bar (Mobile only) -->
       <div class="h-24 md:hidden"></div>
     </div>
   </div>

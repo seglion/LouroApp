@@ -44,20 +44,20 @@
           <!-- Botón Siguiente / Finalizar -->
           <button 
             @click="avanzar" 
-            :disabled="!inspeccionStore.pasoActualValido"
+            :disabled="!inspeccionStore.esLectura && !inspeccionStore.pasoActualValido"
             :class="[
               'flex-1 h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-widest transition-all active:scale-[0.98] group shadow-lg',
               esUltimoPaso 
-                ? 'bg-green-600 dark:bg-green-500 text-white' 
+                ? (inspeccionStore.esLectura ? 'bg-slate-500 text-white' : 'bg-green-600 dark:bg-green-500 text-white')
                 : 'bg-primary dark:bg-accent-blue text-white dark:text-primary disabled:opacity-50 disabled:grayscale'
             ]"
           >
             <div class="flex flex-col items-start gap-0.5 text-left">
-              <span class="text-[10px] font-bold opacity-60">{{ esUltimoPaso ? 'Finalizar' : 'Siguiente' }}</span>
+              <span class="text-[10px] font-bold opacity-60">{{ esUltimoPaso ? (inspeccionStore.esLectura ? 'Vista' : 'Finalizar') : 'Siguiente' }}</span>
               <span class="text-sm">{{ getLabelBotonSiguiente }}</span>
             </div>
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors">
-              <span class="material-symbols-outlined">{{ esUltimoPaso ? 'task_alt' : 'arrow_forward' }}</span>
+              <span class="material-symbols-outlined">{{ esUltimoPaso ? (inspeccionStore.esLectura ? 'close' : 'task_alt') : 'arrow_forward' }}</span>
             </div>
           </button>
         </div>
@@ -147,6 +147,10 @@ const avanzar = () => {
 };
 
 const finalizar = async () => {
+    if (inspeccionStore.esLectura) {
+        router.push('/');
+        return;
+    }
     console.log('Finalizando inspección...', inspeccionStore.inspeccionActual);
     inspeccionStore.inspeccionActual.finalizada = true;
     await inspeccionStore.guardarEnDB();
@@ -158,7 +162,7 @@ const esUltimoPaso = computed(() => inspeccionStore.inspeccionActual.estado_paso
 
 const getTituloPaso = computed(() => titulos[inspeccionStore.inspeccionActual.estado_paso - 1] || "Inspección");
 const getLabelBotonSiguiente = computed(() => {
-    if (esUltimoPaso.value) return "Completar Registro";
+    if (esUltimoPaso.value) return inspeccionStore.esLectura ? "Cerrar Vista" : "Completar Registro";
     return labelsBotones[inspeccionStore.inspeccionActual.estado_paso - 1] || "Continuar";
 });
 </script>

@@ -3,12 +3,18 @@
     <div class="flex-1 p-6 md:p-10 space-y-10 max-w-[1024px] mx-auto w-full">
       
       <!-- Section Header -->
-      <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-6">
-        <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Estado y Entorno</h2>
+      <div class="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Estado y Entorno</h2>
+          <div v-if="inspeccionStore.esLectura" class="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <span class="material-symbols-outlined text-green-500 text-sm">cloud_done</span>
+            <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Sincronizado</span>
+          </div>
+        </div>
         <p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Evaluación de conservación y registro de evidencias</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <fieldset :disabled="inspeccionStore.esLectura" class="grid grid-cols-1 md:grid-cols-2 gap-10 border-none p-0 m-0">
         <!-- Left Column: Evaluación Técnica -->
         <div class="space-y-10">
           <div class="space-y-8">
@@ -145,7 +151,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </fieldset>
       
       <!-- Hidden Input for File Capture -->
       <input 
@@ -173,6 +179,7 @@ const fotoInput = ref<HTMLInputElement | null>(null);
 const currentFotoType = ref<'situacion' | 'interior' | 'esquema' | null>(null);
 
 const capturarFoto = (type: 'situacion' | 'interior' | 'esquema') => {
+  if (inspeccionStore.esLectura) return;
   currentFotoType.value = type;
   fotoInput.value?.click();
 };

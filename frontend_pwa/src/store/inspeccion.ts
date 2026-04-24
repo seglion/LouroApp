@@ -53,7 +53,8 @@ const getInitialState = () => ({
         ruta_foto_situacion: null as string | null,
         ruta_foto_interior: null as string | null,
         ruta_foto_esquema: null as string | null,
-        no_inspeccionable: false
+        no_inspeccionable: false,
+        sync_status: 'pending' as 'pending' | 'synced' | 'error'
     },
     fotosTemporales: {
         situacion: null as string | null,
@@ -110,6 +111,9 @@ export const useInspeccionStore = defineStore('inspeccion', {
                 default:
                     return false;
             }
+        },
+        esLectura(state): boolean {
+            return state.inspeccionActual.sync_status === 'synced';
         }
     },
     actions: {
@@ -180,7 +184,7 @@ export const useInspeccionStore = defineStore('inspeccion', {
 
                 const data: InspeccionLocal = {
                     ...plainData,
-                    sync_status: 'pending',
+                    sync_status: this.inspeccionActual.sync_status || 'pending',
                     last_modified: new Date().toISOString(),
                     // Inyectar los blobs para persistencia offline real
                     blob_foto_situacion: this.fotosTemporales.blob_situacion,
@@ -199,7 +203,7 @@ export const useInspeccionStore = defineStore('inspeccion', {
             const data = await db.inspecciones.get(id);
             if (data) {
                 // Separar metadatos de IndexedDB de los datos de la inspección
-                const { sync_status, last_modified, blob_foto_situacion, blob_foto_interior, blob_foto_esquema, ...datosInspeccion } = data;
+                const { last_modified, blob_foto_situacion, blob_foto_interior, blob_foto_esquema, ...datosInspeccion } = data;
 
                 // Mezclar con el estado inicial para rellenar campos vacíos en borradores antiguos
                 const defaults = getInitialState().inspeccionActual;
@@ -239,7 +243,7 @@ export const useInspeccionStore = defineStore('inspeccion', {
                     .last();
 
                 if (ultimo && ultimo.sync_status === 'pending') {
-                    const { sync_status, last_modified, ...datos } = ultimo;
+                    const { last_modified, ...datos } = ultimo;
 
                     // Aplicar defaults a campos vacíos
                     const defaults = getInitialState().inspeccionActual;
