@@ -492,7 +492,8 @@ const cargarCapasGIS = async () => {
 
   const capas = [
     { url: '/data/principales.geojson', style: { color: '#FF0000', weight: 6, opacity: 1 }, name: 'principales' },
-    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' }
+    { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' },
+    { url: '/data/Prioritaria.geojson', style: { color: '#3b82f6', weight: 6, opacity: 1 }, name: 'prioritarios' }
   ];
 
   for (const capa of capas) {
@@ -573,7 +574,12 @@ const cargarInventario = async () => {
                     inspeccionStore.inspeccionActual.red_va_a_pozo_2 = id_pozo;
                     modoSeleccion.value = null;
                 }
-            }).bindTooltip(id_pozo, { direction: 'bottom', className: 'well-label-small' });
+            }).bindTooltip(pozo.properties?.COD_CAMPO || id_pozo, { 
+                permanent: true, 
+                direction: 'bottom', 
+                className: 'well-label-small',
+                offset: [0, 10]
+            });
         });
 
         // Intentar dibujar línea inicial si ya existen datos
@@ -658,13 +664,15 @@ select {
 }
 
 :deep(.well-label-small) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(255,255,255,0.2) !important;
+  background: #000000 !important;
+  border: 1.5px solid #FFFFFF !important;
   color: white !important;
-  font-weight: bold !important;
-  font-size: 7px !important;
-  padding: 1px 4px !important;
-  border-radius: 3px !important;
+  font-weight: 900 !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+  opacity: 1 !important;
 }
 
 #map-connectivity {
