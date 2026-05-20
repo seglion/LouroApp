@@ -32,6 +32,7 @@ CREATE TABLE pozos_saneamiento (
     largo_pozo_mm INTEGER,
     ancho_pozo_mm INTEGER,
     resalto VARCHAR(50),
+    resalto_altura_cm NUMERIC(6,2),
     filtraciones VARCHAR(50),
     pluviales VARCHAR(50),
     biofilm VARCHAR(50),

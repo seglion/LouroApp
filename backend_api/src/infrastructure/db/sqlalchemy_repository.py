@@ -46,6 +46,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
             largo_pozo_mm=model.largo_pozo_mm,
             ancho_pozo_mm=model.ancho_pozo_mm,
             resalto=model.resalto,
+            resalto_altura_cm=float(model.resalto_altura_cm) if model.resalto_altura_cm is not None else None,
             filtraciones=model.filtraciones,
             pluviales=model.pluviales,
             biofilm=model.biofilm,
@@ -92,6 +93,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
             largo_pozo_mm=inspeccion.largo_pozo_mm,
             ancho_pozo_mm=inspeccion.ancho_pozo_mm,
             resalto=inspeccion.resalto,
+            resalto_altura_cm=inspeccion.resalto_altura_cm,
             filtraciones=inspeccion.filtraciones,
             pluviales=inspeccion.pluviales,
             biofilm=inspeccion.biofilm,
@@ -159,6 +161,7 @@ class SqlAlchemyInspeccionRepository(InspeccionRepository):
         model.largo_pozo_mm = inspeccion.largo_pozo_mm
         model.ancho_pozo_mm = inspeccion.ancho_pozo_mm
         model.resalto = inspeccion.resalto
+        model.resalto_altura_cm = inspeccion.resalto_altura_cm
         model.filtraciones = inspeccion.filtraciones
         model.pluviales = inspeccion.pluviales
         model.biofilm = inspeccion.biofilm

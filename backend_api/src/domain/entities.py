@@ -46,6 +46,7 @@ class Inspeccion:
     largo_pozo_mm: Optional[int] = None
     ancho_pozo_mm: Optional[int] = None
     resalto: Optional[str] = None
+    resalto_altura_cm: Optional[float] = None
     filtraciones: Optional[str] = None
     pluviales: Optional[str] = None
     biofilm: Optional[str] = None

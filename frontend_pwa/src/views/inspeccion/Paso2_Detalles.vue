@@ -185,14 +185,42 @@
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Switches / Toggles para Anomalías -->
+          <!-- Resalto Hidráulico (con input de altura condicional) -->
+          <div class="flex flex-col gap-3">
+            <div @click="inspeccionStore.inspeccionActual.resalto = (inspeccionStore.inspeccionActual.resalto === 'Sí' ? 'No' : 'Sí'); if (inspeccionStore.inspeccionActual.resalto === 'No') inspeccionStore.inspeccionActual.resalto_altura_cm = null"
+                 class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:border-accent-blue/50">
+              <span class="material-symbols-outlined text-3xl transition-colors" :class="inspeccionStore.inspeccionActual.resalto === 'Sí' ? 'text-accent-blue' : 'text-slate-400 group-hover:text-slate-600'">keyboard_tab</span>
+              <span class="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Resalto</span>
+              <div class="w-10 h-5 rounded-full relative transition-colors duration-200" :class="inspeccionStore.inspeccionActual.resalto === 'Sí' ? 'bg-accent-blue' : 'bg-slate-200 dark:bg-slate-700'">
+                <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200" :class="inspeccionStore.inspeccionActual.resalto === 'Sí' ? 'translate-x-5' : 'translate-x-0'"></div>
+              </div>
+            </div>
+            <Transition enter-active-class="transition-all duration-200 ease-out" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition-all duration-150 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
+              <div v-if="inspeccionStore.inspeccionActual.resalto === 'Sí'" class="flex flex-col gap-2">
+                <label for="resalto_altura" class="text-[10px] font-black uppercase tracking-[0.2em] text-primary dark:text-accent-blue">Altura (cm)</label>
+                <div class="relative group">
+                  <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent-blue z-10 text-base">height</span>
+                  <input
+                    id="resalto_altura"
+                    v-model.number="inspeccionStore.inspeccionActual.resalto_altura_cm"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder="0.0"
+                    class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl h-12 pl-10 pr-3 text-slate-900 dark:text-white font-black tracking-tight focus:ring-4 focus:ring-accent-blue/10 focus:border-accent-blue transition-all outline-none"
+                  />
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- Resto de anomalías -->
           <template v-for="anom in [
-            { key: 'resalto', label: 'Resalto', icon: 'keyboard_tab' },
             { key: 'filtraciones', label: 'Filtraciones', icon: 'water_drop' },
             { key: 'pluviales', label: 'Pluviales', icon: 'rainy' },
             { key: 'biofilm', label: 'Biofilm', icon: 'vape_free' }
           ]" :key="anom.key">
-            <div @click="(inspeccionStore.inspeccionActual as any)[anom.key] = ((inspeccionStore.inspeccionActual as any)[anom.key] === 'Sí' ? 'No' : 'Sí')" 
+            <div @click="(inspeccionStore.inspeccionActual as any)[anom.key] = ((inspeccionStore.inspeccionActual as any)[anom.key] === 'Sí' ? 'No' : 'Sí')"
                  class="group flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl cursor-pointer active:scale-[0.98] transition-all shadow-sm hover:border-accent-blue/50">
               <span class="material-symbols-outlined text-3xl transition-colors" :class="(inspeccionStore.inspeccionActual as any)[anom.key] === 'Sí' ? 'text-accent-blue' : 'text-slate-400 group-hover:text-slate-600'">{{ anom.icon }}</span>
               <span class="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">{{ anom.label }}</span>

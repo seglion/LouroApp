@@ -21,6 +21,7 @@ const getInitialState = () => ({
         largo_pozo_mm: null as number | null,
         ancho_pozo_mm: null as number | null,
         resalto: 'No',
+        resalto_altura_cm: null as number | null,
         filtraciones: 'No',
         pluviales: 'No',
         biofilm: 'No',

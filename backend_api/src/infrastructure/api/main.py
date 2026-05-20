@@ -239,6 +239,7 @@ def create_inspeccion(
         largo_pozo_mm=request.largo_pozo_mm,
         ancho_pozo_mm=request.ancho_pozo_mm,
         resalto=request.resalto,
+        resalto_altura_cm=request.resalto_altura_cm,
         filtraciones=request.filtraciones,
         pluviales=request.pluviales,
         biofilm=request.biofilm,

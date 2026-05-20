@@ -39,6 +39,7 @@ class PozoSaneamientoModel(Base):
     largo_pozo_mm = Column(Integer)
     ancho_pozo_mm = Column(Integer)
     resalto = Column(String(50))
+    resalto_altura_cm = Column(Numeric(6, 2))
     filtraciones = Column(String(50))
     pluviales = Column(String(50))
     biofilm = Column(String(50))

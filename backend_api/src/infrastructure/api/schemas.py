@@ -39,6 +39,7 @@ class InspeccionRequest(BaseModel):
     largo_pozo_mm: Optional[int] = None
     ancho_pozo_mm: Optional[int] = None
     resalto: Optional[str] = Field(None, max_length=50)
+    resalto_altura_cm: Optional[float] = None
     filtraciones: Optional[str] = Field(None, max_length=50)
     pluviales: Optional[str] = Field(None, max_length=50)
     biofilm: Optional[str] = Field(None, max_length=50)
@@ -86,6 +87,7 @@ class InspeccionUpdate(BaseModel):
     largo_pozo_mm: Optional[int] = None
     ancho_pozo_mm: Optional[int] = None
     resalto: Optional[str] = Field(None, max_length=50)
+    resalto_altura_cm: Optional[float] = None
     filtraciones: Optional[str] = Field(None, max_length=50)
     pluviales: Optional[str] = Field(None, max_length=50)
     biofilm: Optional[str] = Field(None, max_length=50)

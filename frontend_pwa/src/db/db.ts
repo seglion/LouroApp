@@ -51,6 +51,7 @@ export interface InspeccionRequest {
     largo_pozo_mm: number | null;
     ancho_pozo_mm: number | null;
     resalto: string;
+    resalto_altura_cm: number | null;
     filtraciones: string;
     pluviales: string;
     biofilm: string;
