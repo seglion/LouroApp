@@ -463,7 +463,7 @@ const cargarInventario = async () => {
     
     if (totalEnDb === 0) {
       console.log("Inventario vacío. Descargando repositorio de pozos...");
-      const response = await fetch('/data/pozos.geojson?v=8');
+      const response = await fetch('/data/pozos.geojson?v=9');
       if (!response.ok) throw new Error("No se pudo descargar el inventario inicial.");
       
       const data = await response.json();
