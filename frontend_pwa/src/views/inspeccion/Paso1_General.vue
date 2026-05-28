@@ -463,7 +463,7 @@ const cargarInventario = async () => {
     
     if (totalEnDb === 0) {
       console.log("Inventario vacío. Descargando repositorio de pozos...");
-      const response = await fetch('/data/pozos.geojson?v=9');
+      const response = await fetch('/data/pozos.geojson?v=10');
       if (!response.ok) throw new Error("No se pudo descargar el inventario inicial.");
       
       const data = await response.json();
@@ -472,8 +472,7 @@ const cargarInventario = async () => {
         const batch = data.features
           .filter((f: any) => f.geometry && f.geometry.coordinates) 
           .map((f: any, index: number) => ({
-            // Usar index o ObjectID para asegurar que NUNCA colisionen aunque se llamen igual
-            id: String(f.properties.ObjectId || f.properties.id || `pozo_${index}_${Date.now()}`),
+            id: `pozo_${index}`,
             x: f.geometry.coordinates[0],
             y: f.geometry.coordinates[1],
             properties: {
