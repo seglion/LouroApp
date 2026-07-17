@@ -499,7 +499,8 @@ const cargarCapasGIS = async () => {
   const capas = [
     { url: '/data/principales.geojson', style: { color: '#FF0000', weight: 6, opacity: 1 }, name: 'principales' },
     { url: '/data/secundarios.geojson', style: { color: '#FFFF00', weight: 4, opacity: 1 }, name: 'secundarios' },
-    { url: '/data/Prioritaria.geojson', style: { color: '#3b82f6', weight: 6, opacity: 1 }, name: 'prioritarios' }
+    { url: '/data/Prioritaria.geojson', style: { color: '#3b82f6', weight: 6, opacity: 1 }, name: 'prioritarios' },
+    { url: '/data/Extra.geojson', style: { color: '#FF00FF', weight: 6, opacity: 1 }, name: 'extra' }
   ];
 
   for (const capa of capas) {
